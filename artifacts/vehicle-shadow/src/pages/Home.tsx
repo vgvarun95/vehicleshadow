@@ -15,8 +15,7 @@ import {
 } from "recharts";
 
 
-// Types for GoMechanic section
-type BrandType = "Maruti" | "Hyundai" | "Tata" | "Mahindra" | "Honda" | "Toyota";
+
 
 interface FAQItemProps {
   q: string;
@@ -53,12 +52,7 @@ export default function Home() {
   const { toast } = useToast();
 
 
-  // GoMechanic Section States
-  const [selectedBrand, setSelectedBrand] = useState<BrandType>("Hyundai");
-  const [serviceSearch, setServiceSearch] = useState("");
-  const [pinCode, setPinCode] = useState("");
-  const [workshopResults, setWorkshopResults] = useState<Array<{ name: string; distance: string; rating: string }>>([]);
-  const [searchingWorkshops, setSearchingWorkshops] = useState(false);
+
 
 
 
@@ -85,110 +79,7 @@ export default function Home() {
     form.reset();
   };
 
-  // GoMechanic brand estimates multipliers
-  const brandMultipliers: Record<BrandType, number> = {
-    Maruti: 1.0,
-    Hyundai: 1.12,
-    Tata: 1.2,
-    Mahindra: 1.35,
-    Honda: 1.25,
-    Toyota: 1.45
-  };
 
-  const servicesData = [
-    {
-      icon: Gauge,
-      title: "Periodic Car Services",
-      desc: "Full engine oil replacement, filter cleaning, cabin checks, and coolant top-up.",
-      basePrice: 1999,
-      tag: "Essential Service",
-      category: "periodic"
-    },
-    {
-      icon: Snowflake,
-      title: "Smart AC Repair",
-      desc: "AC gas charging, cooling test, condenser cleaning, and cabin filter replacement.",
-      basePrice: 1499,
-      tag: "45% OFF Today",
-      category: "ac"
-    },
-    {
-      icon: Zap,
-      title: "Batteries & Tyres",
-      desc: "Genuine Exide/Amaron replacements, wheel balancing, and tire rotations.",
-      basePrice: 3299,
-      tag: "Free Installation",
-      category: "batteries"
-    },
-    {
-      icon: Droplet,
-      title: "Premium Car Spa",
-      desc: "Deep dry cleaning, interior detailing, Teflon coating, and scratch wax treatment.",
-      basePrice: 999,
-      tag: "Popular SPA",
-      category: "cleaning"
-    },
-    {
-      icon: Wrench,
-      title: "Dent & Paint Services",
-      desc: "Dent removal, premium panel painting, exact shade match warranty.",
-      basePrice: 2899,
-      tag: "OEM Approved",
-      category: "paint"
-    },
-    {
-      icon: AlertCircle,
-      title: "Brakes & Suspension",
-      desc: "Disc turning, brake pad replacement, and shock absorber suspension tune-ups.",
-      basePrice: 1799,
-      tag: "Safety Check Included",
-      category: "brakes"
-    }
-  ];
-
-  // Workshop Search Simulation
-  const handleWorkshopSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!pinCode.trim()) return;
-
-    setSearchingWorkshops(true);
-    setWorkshopResults([]);
-
-    setTimeout(() => {
-      setSearchingWorkshops(false);
-      setWorkshopResults([
-        {
-          name: `GoMechanic Prime Workshop - Sec 14, Gurugram`,
-          distance: "0.8 km away",
-          rating: "4.8 ★"
-        },
-        {
-          name: `GoMechanic Elite Motors - DLF Phase 3, Gurugram`,
-          distance: "2.4 km away",
-          rating: "4.7 ★"
-        },
-        {
-          name: `GoMechanic Premium Care - Udyog Vihar, Gurugram`,
-          distance: "3.1 km away",
-          rating: "4.9 ★"
-        }
-      ]);
-      toast({
-        title: "Workshops Found",
-        description: `Discovered 3 certified workshops matching location: ${pinCode}`,
-        duration: 3000
-      });
-    }, 1200);
-  };
-
-
-
-  // Filtered services
-  const filteredServices = servicesData.filter(
-    (service) =>
-      service.title.toLowerCase().includes(serviceSearch.toLowerCase()) ||
-      service.desc.toLowerCase().includes(serviceSearch.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen flex flex-col bg-[#05020a] text-white selection:bg-primary selection:text-white font-sans antialiased overflow-x-hidden">
@@ -202,8 +93,7 @@ export default function Home() {
 
           {/* Center Links with Dropdowns like Squarespace */}
           <div className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-slate-300">
-            <a href="#services" className="hover:text-white transition-colors">Services</a>
-            <a href="#templates" className="hover:text-white transition-colors">How It Works</a>
+            <a href="#templates" className="hover:text-white transition-colors">Services</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             <a href="#contact" onClick={handleGetStartedClick} className="hover:text-white transition-colors">Contact</a>
           </div>
@@ -379,214 +269,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GoMechanic-style Workshop Services Section */}
-      <section id="services" className="py-24 md:py-32 bg-[#030107] border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          {/* Header */}
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase mb-4 block">Our Services</span>
-            <h2 className="text-3xl md:text-5xl font-serif font-light mb-6 text-white tracking-tight">
-              Everything Your Vehicle Needs
-            </h2>
-            <p className="text-sm md:text-base text-slate-400 leading-relaxed">
-              A unified ecosystem handling security, compliance, maintenance, and emergency response.
-            </p>
-          </div>
 
-          {/* Interactive Car Brand Selector */}
-          <div className="mb-12">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center mb-6">Select Your Vehicle Brand</h4>
-            <div className="flex flex-wrap justify-center gap-3">
-              {(["Maruti", "Hyundai", "Tata", "Mahindra", "Honda", "Toyota"] as BrandType[]).map((brand) => (
-                <button
-                  key={brand}
-                  onClick={() => {
-                    setSelectedBrand(brand);
-                    toast({
-                      title: `Selected Brand: ${brand}`,
-                      description: `Estimate prices updated dynamically for your ${brand}.`,
-                      duration: 2500
-                    });
-                  }}
-                  className={`px-6 py-2.5 text-xs font-bold uppercase tracking-wider border transition-all rounded-none cursor-pointer ${
-                    selectedBrand === brand
-                      ? "bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/15"
-                      : "bg-transparent text-slate-400 border-white/10 hover:border-white/30 hover:text-white"
-                  }`}
-                >
-                  {brand}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Real-time Service Search Bar */}
-          <div className="max-w-xl mx-auto mb-16 relative">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <Search className="w-4 h-4 text-slate-500" />
-            </div>
-            <input
-              type="text"
-              value={serviceSearch}
-              onChange={(e) => setServiceSearch(e.target.value)}
-              placeholder="Search car services, e.g., AC oil, Wheel Alignment, Teflon..."
-              className="w-full bg-slate-950 border border-white/10 px-12 py-4 text-sm text-white focus:outline-none focus:border-red-600 transition-all rounded-none placeholder-slate-500"
-            />
-            {serviceSearch && (
-              <button
-                onClick={() => setServiceSearch("")}
-                className="absolute inset-y-0 right-4 flex items-center text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          {/* GoMechanic Services Estimate Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-            <AnimatePresence mode="popLayout">
-              {filteredServices.map((service, idx) => {
-                // Calculate dynamic price based on multiplier
-                const calculatedPrice = Math.round(service.basePrice * brandMultipliers[selectedBrand]);
-                return (
-                  <motion.div
-                    key={service.category}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                    className="group bg-slate-950 border border-white/5 p-8 flex flex-col justify-between hover:border-red-600/30 transition-all duration-300 rounded-none relative overflow-hidden"
-                  >
-                    {/* Badge */}
-                    <div className="absolute top-4 right-4 bg-red-600/10 text-red-500 border border-red-500/20 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
-                      {service.tag}
-                    </div>
-
-                    <div>
-                      <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 mb-6 group-hover:bg-red-600 group-hover:text-white transition-all duration-300">
-                        <service.icon className="w-5 h-5" />
-                      </div>
-                      <h3 className="text-lg font-serif font-light text-slate-100 mb-3">{service.title}</h3>
-                      <p className="text-xs text-slate-400 leading-relaxed mb-6">{service.desc}</p>
-                    </div>
-
-                    <div className="border-t border-white/5 pt-6 flex items-center justify-between mt-auto">
-                      <div>
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Estimated Price ({selectedBrand})</span>
-                        <span className="text-xl font-serif text-white font-semibold">₹{calculatedPrice.toLocaleString("en-IN")}</span>
-                      </div>
-                      <Button
-                        asChild
-                        className="rounded-none bg-red-600 hover:bg-red-700 text-white font-bold tracking-widest text-[10px] uppercase px-4 h-9 shadow-none border-none transition-all cursor-pointer"
-                      >
-                        <a href="#contact" onClick={handleGetStartedClick}>Book Service</a>
-                      </Button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-
-            {filteredServices.length === 0 && (
-              <div className="col-span-full text-center py-12 text-slate-500 border border-dashed border-white/10 text-sm">
-                No matching vehicle services found. Try searching for something else.
-              </div>
-            )}
-          </div>
-
-          {/* GoMechanic Promises / Assurances */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-24 border-y border-white/5 py-12 bg-white/[0.01]">
-            {[
-              { icon: Truck, title: "Free Pick-up & Drop", desc: "Contactless doorstep pick-up & delivery service within hours." },
-              { icon: Shield, title: "100% Genuine Spares", desc: "Every part comes direct from authorized OEM/OES catalogs." },
-              { icon: Clock, title: "1000km/1 Month Warranty", desc: "Uncompromised service backup & support warranty on repairs." },
-              { icon: Sparkles, title: "Service Buddy Assigned", desc: "Real-time updates, photos, and direct chat on your dashboard." }
-            ].map((prop, idx) => (
-              <div key={idx} className="flex gap-4 p-2">
-                <div className="flex-shrink-0 w-10 h-10 bg-white/5 flex items-center justify-center text-red-500">
-                  <prop.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h5 className="text-xs font-bold text-white uppercase tracking-wider mb-1.5">{prop.title}</h5>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">{prop.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Interactive Workshop Finder Widget */}
-          <div className="bg-slate-950 border border-white/5 p-8 max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h4 className="text-xl font-serif font-light text-white mb-2">Find a GoMechanic Certified Hub</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Enter your city name or pin code to view certified, smart-diagnostic partner workshops active in your locality.
-                </p>
-              </div>
-
-              <form onSubmit={handleWorkshopSearch} className="space-y-4">
-                <div className="flex gap-2">
-                  <input
-                    required
-                    type="text"
-                    value={pinCode}
-                    onChange={(e) => setPinCode(e.target.value)}
-                    placeholder="Enter City or Pin Code (e.g. 122001)"
-                    className="flex-grow bg-slate-900 border border-white/10 px-4 py-3 text-xs text-white focus:outline-none focus:border-red-600 transition-all rounded-none placeholder-slate-500"
-                  />
-                  <Button
-                    type="submit"
-                    className="rounded-none bg-red-600 hover:bg-red-700 text-white font-bold tracking-widest text-[10px] uppercase px-5 h-11 shadow-none border-none transition-all cursor-pointer flex-shrink-0"
-                    disabled={searchingWorkshops}
-                  >
-                    {searchingWorkshops ? "Searching..." : "Find Workshop"}
-                  </Button>
-                </div>
-
-                {/* Search Results Display */}
-                <AnimatePresence>
-                  {workshopResults.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="space-y-2 border-t border-white/5 pt-4 mt-4"
-                    >
-                      {workshopResults.map((workshop, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between text-xs bg-white/5 p-3 border border-white/5 hover:border-red-600/20 transition-all"
-                        >
-                          <div>
-                            <span className="font-semibold text-slate-200 block">{workshop.name}</span>
-                            <span className="text-[10px] text-slate-400">{workshop.distance}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-red-500 font-bold uppercase tracking-wider text-[9px] bg-red-500/10 px-2 py-0.5">{workshop.rating}</span>
-                            <button
-                              className="text-white hover:text-red-500 text-[10px] uppercase font-bold tracking-widest"
-                              onClick={() => {
-                                toast({
-                                  title: "Workshop Selected",
-                                  description: `Assigned workshop for your next service booking.`,
-                                  duration: 3000
-                                });
-                              }}
-                            >
-                              Select
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* FAQ Section */}
       <section id="faq" className="py-24 md:py-32 bg-[#05020a] border-t border-white/5">
