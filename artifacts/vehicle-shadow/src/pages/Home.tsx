@@ -57,11 +57,12 @@ export default function Home() {
 
 
   // Smooth scroll handler
-  const handleGetStartedClick = (e: React.MouseEvent) => {
+  // Smooth scroll handler
+  const handleScrollTo = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    const contactSection = document.getElementById("contact");
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" });
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -93,9 +94,10 @@ export default function Home() {
 
           {/* Center Links with Dropdowns like Squarespace */}
           <div className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-slate-300">
-            <a href="#templates" className="hover:text-white transition-colors">Services</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            <a href="#contact" onClick={handleGetStartedClick} className="hover:text-white transition-colors">Contact</a>
+            <a href="#templates" onClick={handleScrollTo("templates")} className="hover:text-white transition-colors">Services</a>
+            <a href="#how-it-works" onClick={handleScrollTo("how-it-works")} className="hover:text-white transition-colors">How It Works</a>
+            <a href="#faq" onClick={handleScrollTo("faq")} className="hover:text-white transition-colors">FAQ</a>
+            <a href="#contact" onClick={handleScrollTo("contact")} className="hover:text-white transition-colors">Contact</a>
           </div>
 
           {/* Right Actions */}
@@ -107,7 +109,7 @@ export default function Home() {
               asChild
               className="rounded-none bg-white hover:bg-neutral-200 text-black font-bold tracking-widest px-6 h-10 text-xs uppercase shadow-none border-none transition-all cursor-pointer"
             >
-              <a href="#contact" onClick={handleGetStartedClick}>Get Started</a>
+              <a href="#contact" onClick={handleScrollTo("contact")}>Get Started</a>
             </Button>
           </div>
         </div>
@@ -146,7 +148,7 @@ export default function Home() {
                 size="lg"
                 className="rounded-none bg-white hover:bg-neutral-200 text-black font-bold tracking-widest text-xs uppercase px-8 h-12 shadow-none border-none transition-all cursor-pointer w-48 sm:w-auto"
               >
-                <a href="#contact" onClick={handleGetStartedClick}>Get Started</a>
+                <a href="#contact" onClick={handleScrollTo("contact")}>Get Started</a>
               </Button>
               <Button
                 size="lg"
@@ -269,6 +271,88 @@ export default function Home() {
         </div>
       </section>
 
+
+
+      {/* How It Works Section - White Clean Grid Style */}
+      <section id="how-it-works" className="py-24 md:py-32 bg-white border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <span className="text-xs font-bold text-orange-600 tracking-widest uppercase mb-4 block">Our Services</span>
+            <h2 className="text-3xl md:text-5xl font-sans font-bold mb-6 text-slate-900 tracking-tight">
+              Everything Your Vehicle Needs
+            </h2>
+            <p className="text-sm md:text-base text-slate-500 max-w-2xl mx-auto leading-relaxed font-semibold">
+              A unified ecosystem handling security, compliance, maintenance, and emergency response.
+            </p>
+          </div>
+
+          {/* Grid of 6 Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: FileText,
+                title: "Documentation Management",
+                desc: "Centralized vehicle details & documentation. Never lose a paper again.",
+                iconBg: "bg-orange-100",
+                iconColor: "text-orange-600",
+                borderColor: "hover:border-orange-200"
+              },
+              {
+                icon: ShieldCheck,
+                title: "Compliance Updates",
+                desc: "Real-time challan alerts & compliance updates so you stay ahead of penalties.",
+                iconBg: "bg-blue-100",
+                iconColor: "text-blue-600",
+                borderColor: "hover:border-blue-200"
+              },
+              {
+                icon: Wrench,
+                title: "Genuine Spare Parts",
+                desc: "Direct access to verified, genuine spare parts from manufacturers.",
+                iconBg: "bg-slate-100",
+                iconColor: "text-slate-600",
+                borderColor: "hover:border-slate-300"
+              },
+              {
+                icon: Search,
+                title: "On-Demand Mechanics",
+                desc: "24/7 mechanic support for unexpected breakdowns anywhere in India.",
+                iconBg: "bg-cyan-100",
+                iconColor: "text-cyan-600",
+                borderColor: "hover:border-cyan-200"
+              },
+              {
+                icon: MapPin,
+                title: "Real-Time Tracking",
+                desc: "Advanced GPS tracking with real-time location data and route history.",
+                iconBg: "bg-emerald-100",
+                iconColor: "text-emerald-600",
+                borderColor: "hover:border-emerald-200"
+              },
+              {
+                icon: BarChart3,
+                title: "Analytics Dashboard",
+                desc: "Track expenses, compliance status, and vehicle health in one place.",
+                iconBg: "bg-violet-100",
+                iconColor: "text-violet-650",
+                borderColor: "hover:border-violet-200"
+              }
+            ].map((card, idx) => (
+              <div
+                key={idx}
+                className={`bg-white border border-slate-100 p-8 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all duration-300 ${card.borderColor} hover:shadow-[0_12px_30px_rgba(0,0,0,0.05)]`}
+              >
+                <div className={`w-12 h-12 rounded-xl ${card.iconBg} ${card.iconColor} flex items-center justify-center mb-6`}>
+                  <card.icon className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-3">{card.title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed font-semibold">{card.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
 
       {/* FAQ Section */}
