@@ -384,12 +384,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold text-red-500 tracking-widest uppercase mb-4 block">Certified Smart Workshops</span>
+            <span className="text-xs font-bold text-primary tracking-widest uppercase mb-4 block">Our Services</span>
             <h2 className="text-3xl md:text-5xl font-serif font-light mb-6 text-white tracking-tight">
-              Workshop & Mechanic Services
+              Everything Your Vehicle Needs
             </h2>
             <p className="text-sm md:text-base text-slate-400 leading-relaxed">
-              Premium, hassle-free car servicing. Select your brand, view real-time estimates, find certified GoMechanic-level workshops, and secure your booking.
+              A unified ecosystem handling security, compliance, maintenance, and emergency response.
             </p>
           </div>
 
