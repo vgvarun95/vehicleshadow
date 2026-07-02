@@ -1,0 +1,28 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with dark shadow color -->
+  <rect width="180" height="180" rx="45" fill="#0A0812" />
+  
+  <!-- Outer glowing ring/border -->
+  <rect x="6" y="6" width="168" height="168" rx="39" stroke="url(#paint0_linear)" stroke-width="5"/>
+  
+  <!-- Stylized Vehicle Icon (Sleek aerodynamic car shape) -->
+  <path d="M45 105 L55 90 C58 85 68 70 85 68 L95 68 C112 70 122 85 125 90 L135 105 C142 108 145 112 145 118 C145 125 138 128 132 128 L48 128 C42 128 35 125 35 118 C35 112 38 108 45 105 Z" fill="#FFFFFF"/>
+  
+  <!-- Windshield/Windows -->
+  <path d="M62 88 L85 75 L95 75 L118 88 C110 82 100 80 90 80 C80 80 70 82 62 88 Z" fill="#0A0812" opacity="0.85"/>
+  
+  <!-- Glowing Headlights -->
+  <circle cx="52" cy="108" r="4" fill="#FF3C00" />
+  <circle cx="128" cy="108" r="4" fill="#FF3C00" />
+  
+  <!-- Shadow (Vehicle Shadow theme!) -->
+  <ellipse cx="90" cy="142" rx="60" ry="10" fill="#000000" fill-opacity="0.9"/>
+  <ellipse cx="90" cy="142" rx="50" ry="6" fill="#FF3C00" fill-opacity="0.3"/>
+
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF3C00"/>
+      <stop offset="1" stop-color="#9A00FF"/>
+    </linearGradient>
+  </defs>
+</svg>

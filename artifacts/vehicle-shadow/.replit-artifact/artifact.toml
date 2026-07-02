@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Vehicle Shadow"
+version = "1.0.0"
+id = "artifacts/vehicle-shadow"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23716
+
+[services.development]
+run = "pnpm --filter @workspace/vehicle-shadow run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vehicle-shadow", "run", "build" ]
+publicDir = "artifacts/vehicle-shadow/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23716"
+BASE_PATH = "/"
