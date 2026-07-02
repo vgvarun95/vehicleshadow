@@ -273,16 +273,16 @@ export default function Home() {
 
 
 
-      {/* How It Works Section - White Clean Grid Style */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-white border-t border-slate-200">
+      {/* How It Works Section - Dark premium style */}
+      <section id="how-it-works" className="py-24 md:py-32 bg-[#05020a] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           {/* Header */}
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <span className="text-xs font-bold text-orange-600 tracking-widest uppercase mb-4 block">Our Services</span>
-            <h2 className="text-3xl md:text-5xl font-sans font-bold mb-6 text-slate-900 tracking-tight">
+            <span className="text-xs font-bold text-primary tracking-widest uppercase mb-4 block">Our Services</span>
+            <h2 className="text-3xl md:text-5xl font-serif font-light mb-6 text-white tracking-tight">
               Everything Your Vehicle Needs
             </h2>
-            <p className="text-sm md:text-base text-slate-500 max-w-2xl mx-auto leading-relaxed font-semibold">
+            <p className="text-sm md:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
               A unified ecosystem handling security, compliance, maintenance, and emergency response.
             </p>
           </div>
@@ -294,60 +294,50 @@ export default function Home() {
                 icon: FileText,
                 title: "Documentation Management",
                 desc: "Centralized vehicle details & documentation. Never lose a paper again.",
-                iconBg: "bg-orange-100",
-                iconColor: "text-orange-600",
-                borderColor: "hover:border-orange-200"
+                iconColor: "text-orange-500"
               },
               {
                 icon: ShieldCheck,
                 title: "Compliance Updates",
                 desc: "Real-time challan alerts & compliance updates so you stay ahead of penalties.",
-                iconBg: "bg-blue-100",
-                iconColor: "text-blue-600",
-                borderColor: "hover:border-blue-200"
+                iconColor: "text-blue-500"
               },
               {
                 icon: Wrench,
                 title: "Genuine Spare Parts",
                 desc: "Direct access to verified, genuine spare parts from manufacturers.",
-                iconBg: "bg-slate-100",
-                iconColor: "text-slate-600",
-                borderColor: "hover:border-slate-300"
+                iconColor: "text-slate-400"
               },
               {
                 icon: Search,
                 title: "On-Demand Mechanics",
                 desc: "24/7 mechanic support for unexpected breakdowns anywhere in India.",
-                iconBg: "bg-cyan-100",
-                iconColor: "text-cyan-600",
-                borderColor: "hover:border-cyan-200"
+                iconColor: "text-cyan-500"
               },
               {
                 icon: MapPin,
                 title: "Real-Time Tracking",
                 desc: "Advanced GPS tracking with real-time location data and route history.",
-                iconBg: "bg-emerald-100",
-                iconColor: "text-emerald-600",
-                borderColor: "hover:border-emerald-200"
+                iconColor: "text-emerald-500"
               },
               {
                 icon: BarChart3,
                 title: "Analytics Dashboard",
                 desc: "Track expenses, compliance status, and vehicle health in one place.",
-                iconBg: "bg-violet-100",
-                iconColor: "text-violet-650",
-                borderColor: "hover:border-violet-200"
+                iconColor: "text-violet-500"
               }
             ].map((card, idx) => (
               <div
                 key={idx}
-                className={`bg-white border border-slate-100 p-8 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all duration-300 ${card.borderColor} hover:shadow-[0_12px_30px_rgba(0,0,0,0.05)]`}
+                className="group bg-slate-950 border border-white/5 p-8 rounded-none hover:border-white/20 transition-all duration-300 flex flex-col justify-between"
               >
-                <div className={`w-12 h-12 rounded-xl ${card.iconBg} ${card.iconColor} flex items-center justify-center mb-6`}>
-                  <card.icon className="w-5 h-5" />
+                <div>
+                  <div className="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center text-slate-350 mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <card.icon className={`w-5 h-5 ${card.iconColor} group-hover:text-white transition-colors`} />
+                  </div>
+                  <h3 className="text-lg font-serif font-light text-slate-100 mb-3">{card.title}</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">{card.desc}</p>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">{card.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed font-semibold">{card.desc}</p>
               </div>
             ))}
           </div>
