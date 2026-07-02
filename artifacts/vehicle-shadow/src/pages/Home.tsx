@@ -14,10 +14,6 @@ import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip
 } from "recharts";
 
-// Types for the Customizer Demo
-type ThemeType = "violet" | "carbon" | "emerald";
-type PresetType = "fleet" | "personal" | "eco" | "emergency";
-type WidgetType = "compliance" | "charts" | "map" | "mall";
 
 // Types for GoMechanic section
 type BrandType = "Maruti" | "Hyundai" | "Tata" | "Mahindra" | "Honda" | "Toyota";
@@ -56,17 +52,6 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // Customizer state
-  const [activeTheme, setActiveTheme] = useState<ThemeType>("violet");
-  const [activePreset, setActivePreset] = useState<PresetType>("personal");
-  const [widgets, setWidgets] = useState<Record<WidgetType, boolean>>({
-    compliance: true,
-    charts: true,
-    map: true,
-    mall: true
-  });
-  const [immobilized, setImmobilized] = useState(false);
-  const [selectedSchematic, setSelectedSchematic] = useState<number | null>(null);
 
   // GoMechanic Section States
   const [selectedBrand, setSelectedBrand] = useState<BrandType>("Hyundai");
@@ -75,7 +60,7 @@ export default function Home() {
   const [workshopResults, setWorkshopResults] = useState<Array<{ name: string; distance: string; rating: string }>>([]);
   const [searchingWorkshops, setSearchingWorkshops] = useState(false);
 
-  const customizerRef = useRef<HTMLDivElement>(null);
+
 
   // Smooth scroll handler
   const handleGetStartedClick = (e: React.MouseEvent) => {
@@ -86,19 +71,7 @@ export default function Home() {
     }
   };
 
-  // Scroll to customizer and select template style
-  const handleSelectTemplate = (preset: PresetType, theme: ThemeType) => {
-    setActivePreset(preset);
-    setActiveTheme(theme);
-    toast({
-      title: `Template Selected: ${preset.toUpperCase()}`,
-      description: `Loaded preset into the live customizable dashboard below.`,
-      duration: 3000
-    });
-    if (customizerRef.current) {
-      customizerRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
+
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,97 +181,7 @@ export default function Home() {
     }, 1200);
   };
 
-  // Theme variable map for mockup dashboard
-  const getThemeClasses = () => {
-    switch (activeTheme) {
-      case "carbon":
-        return {
-          bg: "bg-neutral-950 border-neutral-800 text-white",
-          primary: "text-white",
-          accentBg: "bg-white",
-          accentText: "text-neutral-950",
-          border: "border-neutral-800",
-          accentBorder: "border-white",
-          chartColor: "#ffffff",
-          pillBg: "bg-neutral-900",
-          glow: "shadow-[0_0_20px_rgba(255,255,255,0.05)]",
-          accentHover: "hover:bg-neutral-200"
-        };
-      case "emerald":
-        return {
-          bg: "bg-slate-950 border-emerald-950/40 text-emerald-50",
-          primary: "text-emerald-400",
-          accentBg: "bg-emerald-500",
-          accentText: "text-slate-950",
-          border: "border-emerald-900/20",
-          accentBorder: "border-emerald-500",
-          chartColor: "#10b981",
-          pillBg: "bg-emerald-950/20",
-          glow: "shadow-[0_0_20px_rgba(16,185,129,0.05)]",
-          accentHover: "hover:bg-emerald-400"
-        };
-      case "violet":
-      default:
-        return {
-          bg: "bg-slate-950 border-slate-800 text-slate-50",
-          primary: "text-primary",
-          accentBg: "bg-primary",
-          accentText: "text-white",
-          border: "border-slate-800",
-          accentBorder: "border-primary",
-          chartColor: "#a855f7",
-          pillBg: "bg-primary/10",
-          glow: "shadow-[0_0_20px_rgba(168,85,247,0.08)]",
-          accentHover: "hover:bg-primary/90"
-        };
-    }
-  };
 
-  const currentTheme = getThemeClasses();
-
-  // Mock Data for charts based on preset
-  const getChartData = () => {
-    switch (activePreset) {
-      case "fleet":
-        return [
-          { name: "Mon", value: 92 },
-          { name: "Tue", value: 95 },
-          { name: "Wed", value: 98 },
-          { name: "Thu", value: 94 },
-          { name: "Fri", value: 97 },
-          { name: "Sat", value: 91 },
-          { name: "Sun", value: 99 }
-        ];
-      case "eco":
-        return [
-          { name: "Mon", value: 18.2 },
-          { name: "Tue", value: 19.5 },
-          { name: "Wed", value: 21.1 },
-          { name: "Thu", value: 20.4 },
-          { name: "Fri", value: 22.4 },
-          { name: "Sat", value: 23.0 },
-          { name: "Sun", value: 22.8 }
-        ];
-      case "emergency":
-        return [
-          { name: "10:00", value: 2 },
-          { name: "11:00", value: 1.5 },
-          { name: "12:00", value: 0.8 },
-          { name: "13:00", value: 1.2 },
-          { name: "14:00", value: 0.5 }
-        ];
-      case "personal":
-      default:
-        return [
-          { name: "Jan", value: 120 },
-          { name: "Feb", value: 150 },
-          { name: "Mar", value: 80 },
-          { name: "Apr", value: 220 },
-          { name: "May", value: 140 },
-          { name: "Jun", value: 190 }
-        ];
-    }
-  };
 
   // Filtered services
   const filteredServices = servicesData.filter(
@@ -379,13 +262,12 @@ export default function Home() {
                 size="lg"
                 variant="outline"
                 className="rounded-none border-slate-800 text-slate-300 hover:bg-slate-900 tracking-widest text-xs uppercase px-8 h-12 transition-all w-48 sm:w-auto cursor-pointer"
-                onClick={() => {
-                  if (customizerRef.current) {
-                    customizerRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-                  }
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("templates")?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                <Play className="mr-2 w-3.5 h-3.5 fill-current" /> Try Editor Demo
+                <Play className="mr-2 w-3.5 h-3.5 fill-current" /> Explore Features
               </Button>
             </div>
           </div>
@@ -466,9 +348,12 @@ export default function Home() {
                     <Button
                       size="sm"
                       className="rounded-none bg-white hover:bg-neutral-200 text-black font-semibold text-[11px] uppercase tracking-wider px-4 h-9 shadow-none border-none transition-all cursor-pointer"
-                      onClick={() => handleSelectTemplate(tmpl.id as PresetType, tmpl.theme as ThemeType)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                      }}
                     >
-                      Preview Module
+                      Get Started
                     </Button>
                   </div>
                 </div>
@@ -480,372 +365,16 @@ export default function Home() {
                   </div>
                   <button
                     className="mt-6 flex items-center text-[10px] uppercase tracking-widest font-bold text-slate-300 group-hover:text-primary transition-colors text-left"
-                    onClick={() => handleSelectTemplate(tmpl.id as PresetType, tmpl.theme as ThemeType)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                    }}
                   >
-                    Load Preview <ChevronRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
+                    Get Started <ChevronRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Customizer playground Section */}
-      <section id="customizer" ref={customizerRef} className="py-24 md:py-32 bg-[#05020a] border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <div className="text-center max-w-2xl mx-auto mb-20">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase mb-4 block">Interactive Sandbox</span>
-            <h2 className="text-3xl md:text-5xl font-serif font-light mb-6 text-white tracking-tight">Customize in real time.</h2>
-            <p className="text-sm md:text-base text-slate-400">
-              Adjust widgets, presets, and color palettes to configure your interface before launching. See changes instantly.
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-3 gap-12 items-start">
-            {/* Left Settings Sidebar */}
-            <div className="bg-slate-950 border border-white/5 p-8 space-y-8 rounded-none">
-              {/* Preset Selector */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Select Module Preset</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: "personal", label: "Compliance" },
-                    { id: "fleet", label: "Parts Mall" },
-                    { id: "eco", label: "Workshops" },
-                    { id: "emergency", label: "GPS Tracking" }
-                  ].map((preset) => (
-                    <button
-                      key={preset.id}
-                      onClick={() => setActivePreset(preset.id as PresetType)}
-                      className={`h-10 text-xs font-semibold px-4 border transition-all text-center rounded-none cursor-pointer ${
-                        activePreset === preset.id
-                          ? "bg-white text-black border-white"
-                          : "bg-transparent text-slate-400 border-white/10 hover:border-white/30"
-                      }`}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Theme Selector */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Color Palette</h4>
-                <div className="flex gap-3">
-                  {[
-                    { id: "violet", color: "bg-primary", border: "border-primary" },
-                    { id: "carbon", color: "bg-white", border: "border-white" },
-                    { id: "emerald", color: "bg-emerald-500", border: "border-emerald-500" }
-                  ].map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setActiveTheme(theme.id as ThemeType)}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all cursor-pointer ${
-                        activeTheme === theme.id ? theme.border : "border-transparent"
-                      }`}
-                    >
-                      <span className={`w-5 h-5 rounded-full ${theme.color}`} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Widget Toggles */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Active Widgets</h4>
-                <div className="space-y-3">
-                  {[
-                    { id: "compliance", label: "Compliance Calendar" },
-                    { id: "charts", label: "Analytics Charts" },
-                    { id: "map", label: "GPS Tracker & Engine Lock" },
-                    { id: "mall", label: "Spare Parts Mall" }
-                  ].map((widget) => (
-                    <label
-                      key={widget.id}
-                      className="flex items-center justify-between text-xs text-slate-300 font-semibold cursor-pointer group"
-                    >
-                      <span>{widget.label}</span>
-                      <input
-                        type="checkbox"
-                        checked={widgets[widget.id as WidgetType]}
-                        onChange={() =>
-                          setWidgets((prev) => ({
-                            ...prev,
-                            [widget.id]: !prev[widget.id as WidgetType]
-                          }))
-                        }
-                        className="w-4 h-4 rounded border-white/15 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer accent-primary"
-                      />
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action */}
-              <Button
-                asChild
-                className="w-full rounded-none bg-white hover:bg-neutral-200 text-black font-bold tracking-widest text-xs uppercase h-11 border-none shadow-none transition-all cursor-pointer"
-              >
-                <a href="#contact" onClick={handleGetStartedClick}>Apply This Style</a>
-              </Button>
-            </div>
-
-            {/* Right Dashboard Live Preview Mockup */}
-            <div className={`lg:col-span-2 border transition-all duration-300 p-6 sm:p-8 min-h-[480px] rounded-none flex flex-col justify-between ${currentTheme.bg} ${currentTheme.border} ${currentTheme.glow}`}>
-              {/* Mockup Header */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full ${currentTheme.pillBg} flex items-center justify-center`}>
-                    <Gauge className={`w-4 h-4 ${currentTheme.primary}`} />
-                  </div>
-                  <div>
-                    <h5 className="text-sm font-bold text-white uppercase tracking-wider">
-                      {activePreset === "fleet" ? "Spare Parts Mall" : activePreset === "eco" ? "GoMechanic Booking" : activePreset === "emergency" ? "VeyronGPS Hub" : "Compliance Vault"}
-                    </h5>
-                    <p className="text-[10px] text-slate-400">Live Workspace</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Operational</span>
-                </div>
-              </div>
-
-              {/* Mockup Core Grid */}
-              <div className="grid sm:grid-cols-2 gap-4 flex-grow">
-                {/* Stats Panel */}
-                <div className="bg-white/5 border border-white/5 p-4 flex flex-col justify-between">
-                  <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                    {activePreset === "fleet" ? "Shopping Cart Items" : activePreset === "eco" ? "Assigned Service Buddy" : activePreset === "emergency" ? "Engine Protection Shield" : "Active Vehicle Documents"}
-                  </div>
-
-                  <div className="my-4">
-                    <span className="text-3xl sm:text-4xl font-serif font-light text-white">
-                      {activePreset === "fleet" ? "3 Parts" : activePreset === "eco" ? "Amit Kumar" : activePreset === "emergency" ? (immobilized ? "LOCKED" : "ACTIVE") : "3 Valid"}
-                    </span>
-                    <span className={`text-[10px] font-bold ml-2 ${activePreset === "eco" ? "text-emerald-400" : activePreset === "emergency" && immobilized ? "text-red-400" : "text-slate-400"}`}>
-                      {activePreset === "fleet" ? "Total: ₹2,148" : activePreset === "eco" ? "Sec-14, Gurgaon" : activePreset === "emergency" ? (immobilized ? "Engine Disabled" : "Security Armed") : "1 Expiring PUC"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 border-t border-white/5 pt-3">
-                    <Activity className="w-3.5 h-3.5" />
-                    <span>System state diagnostics: Clean</span>
-                  </div>
-                </div>
-
-                {/* Compliance Alert Widget */}
-                {widgets.compliance && (
-                  <div className="bg-white/5 border border-white/5 p-4 flex flex-col justify-between">
-                    <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Compliance Deadlines</div>
-                    <div className="space-y-2.5 my-3">
-                      {activePreset === "personal" ? (
-                        <>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">PUC Renewal</span>
-                            <span className="text-amber-400 text-[10px] font-bold uppercase bg-amber-500/10 px-2 py-0.5 border border-amber-500/20">14 Days</span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">Insurance Policy</span>
-                            <span className="text-green-400 text-[10px] font-bold uppercase bg-green-500/10 px-2 py-0.5 border border-green-500/20">3 Months</span>
-                          </div>
-                        </>
-                      ) : activePreset === "fleet" ? (
-                        <>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">Exploded Diagram</span>
-                            <span className="text-green-400 text-[10px] font-bold uppercase bg-green-500/10 px-2 py-0.5 border border-green-500/20">Active</span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">VIN Verification</span>
-                            <span className="text-green-400 text-[10px] font-bold uppercase bg-green-500/10 px-2 py-0.5 border border-green-500/20">Verified</span>
-                          </div>
-                        </>
-                      ) : activePreset === "eco" ? (
-                        <>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">Periodic Service</span>
-                            <span className="text-amber-400 text-[10px] font-bold uppercase bg-amber-500/10 px-2 py-0.5 border border-amber-500/20">Secured</span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">Pickup Slot</span>
-                            <span className="text-green-400 text-[10px] font-bold uppercase bg-green-500/10 px-2 py-0.5 border border-green-500/20">10:00 AM</span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">Engine Block State</span>
-                            <span className={`${immobilized ? "text-red-400 bg-red-500/10 border-red-500/20" : "text-green-400 bg-green-500/10 border-green-500/20"} text-[10px] font-bold uppercase px-2 py-0.5 border`}>
-                              {immobilized ? "LOCKED" : "READY"}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-300 font-semibold">Geofence (Home Zone)</span>
-                            <span className="text-green-400 text-[10px] font-bold uppercase bg-green-500/10 px-2 py-0.5 border border-green-500/20">Inside</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <div className="text-[9px] text-slate-500">Auto-synced with Ministry of Transport database</div>
-                  </div>
-                )}
-
-                {/* Chart Widget */}
-                {widgets.charts && (
-                  <div className="bg-white/5 border border-white/5 p-4 sm:col-span-2 min-h-[140px] flex flex-col justify-between">
-                    <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-2">
-                      {activePreset === "fleet" ? "Spare Parts Mall Order History" : activePreset === "eco" ? "Monthly Car Service Cost Trend (₹)" : activePreset === "emergency" ? "Telemetry Speed Index (km/h)" : "Compliance Challans & Fees Index"}
-                    </div>
-                    <div className="h-24 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        {activePreset === "fleet" ? (
-                          <BarChart data={getChartData()}>
-                            <Bar dataKey="value" fill={currentTheme.chartColor} radius={[2, 2, 0, 0]} />
-                          </BarChart>
-                        ) : activePreset === "eco" ? (
-                          <LineChart data={getChartData()}>
-                            <Line type="monotone" dataKey="value" stroke={currentTheme.chartColor} strokeWidth={2} dot={false} />
-                          </LineChart>
-                        ) : (
-                          <AreaChart data={getChartData()}>
-                            <defs>
-                              <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={currentTheme.chartColor} stopOpacity={0.3}/>
-                                <stop offset="95%" stopColor={currentTheme.chartColor} stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <Area type="monotone" dataKey="value" stroke={currentTheme.chartColor} strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
-                          </AreaChart>
-                        )}
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
-
-                {/* Map Widget */}
-                {widgets.map && (
-                  <div className="bg-white/5 border border-white/5 p-4 sm:col-span-2 flex flex-col justify-between gap-3">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex-grow text-left">
-                        <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">GPS Live Coordinates</div>
-                        <div className="text-xs font-semibold text-white mt-1">28.4595° N, 77.0266° E</div>
-                        <div className="text-[9px] text-slate-400 mt-0.5">Gurugram, Sector 14 • Moving at 42 km/h</div>
-                      </div>
-                      <div className="w-16 h-16 bg-slate-900 border border-white/10 flex items-center justify-center rounded-none relative overflow-hidden flex-shrink-0">
-                        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:8px_8px]" />
-                        <div className={`w-2 h-2 rounded-full absolute ${currentTheme.accentBg} ${immobilized ? "bg-red-500 animate-none" : "animate-ping"}`} />
-                        <div className={`w-1.5 h-1.5 rounded-full absolute ${immobilized ? "bg-red-500" : currentTheme.accentBg}`} />
-                      </div>
-                    </div>
-                    <div className="border-t border-white/5 pt-2 flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-1.5">
-                        {immobilized ? (
-                          <span className="text-red-500 text-[10px] font-bold uppercase bg-red-500/10 px-2 py-0.5 border border-red-500/20 flex items-center gap-1">
-                            <Lock className="w-3 h-3" /> Engine Locked
-                          </span>
-                        ) : (
-                          <span className="text-green-500 text-[10px] font-bold uppercase bg-green-500/10 px-2 py-0.5 border border-green-500/20 flex items-center gap-1">
-                            <Unlock className="w-3 h-3" /> Engine Active
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => {
-                          setImmobilized(!immobilized);
-                          toast({
-                            title: immobilized ? "Engine Mobilized" : "Engine Immobilized",
-                            description: immobilized ? "Engine lock deactivated. Vehicle is ready to start." : "Anti-theft shield enabled. Engine ignition blocked.",
-                          });
-                        }}
-                        className={`text-[9px] font-black uppercase px-2 py-1 transition-all rounded-none cursor-pointer ${
-                          immobilized ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-red-650 hover:bg-red-700 text-white"
-                        }`}
-                      >
-                        {immobilized ? "Unlock Engine" : "Immobilize Engine"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Spare Parts Mall Schematic Widget */}
-                {widgets.mall && (
-                  <div className="bg-white/5 border border-white/5 p-4 sm:col-span-2 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-400 block text-[9px] uppercase font-bold tracking-wider">Parts Schematic Catalog Preview</span>
-                      <span className="text-[9px] text-slate-500 font-semibold">Click blueprint numbers to filter</span>
-                    </div>
-                    <div className="flex gap-4 items-center">
-                      <div className="w-24 h-16 bg-slate-900 border border-white/10 flex items-center justify-center relative overflow-hidden flex-shrink-0">
-                        <svg className="w-full h-full text-slate-650" viewBox="0 0 100 80" fill="none">
-                          <rect x="25" y="20" width="50" height="40" rx="3" stroke="currentColor" strokeWidth="1" strokeDasharray="2 1" />
-                          <circle cx="50" cy="40" r="12" stroke="currentColor" strokeWidth="1" />
-                          <line x1="15" y1="40" x2="25" y2="40" stroke="currentColor" />
-                          <line x1="75" y1="40" x2="85" y2="40" stroke="currentColor" />
-                        </svg>
-                        <button
-                          onClick={() => {
-                            setSelectedSchematic(1);
-                            toast({
-                              title: "Selected: Spark Plugs Catalog",
-                              description: "Filtered genuine spark plugs for Maruti Suzuki Swift.",
-                              duration: 2000
-                            });
-                          }}
-                          className={`absolute top-2 left-6 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold transition-all cursor-pointer ${
-                            selectedSchematic === 1 ? "bg-emerald-600 text-white" : "bg-primary text-white"
-                          }`}
-                        >
-                          ①
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedSchematic(2);
-                            toast({
-                              title: "Selected: Brake Pads Catalog",
-                              description: "Filtered genuine front brake pads for Maruti Suzuki Swift.",
-                              duration: 2000
-                            });
-                          }}
-                          className={`absolute bottom-2 right-6 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold transition-all cursor-pointer ${
-                            selectedSchematic === 2 ? "bg-emerald-600 text-white" : "bg-primary text-white"
-                          }`}
-                        >
-                          ②
-                        </button>
-                      </div>
-
-                      <div className="flex-grow text-left">
-                        {selectedSchematic === 1 ? (
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-bold text-white block">Bosch Spark Plug Set</span>
-                            <span className="text-[9px] text-slate-400 block font-mono">OE Ref: SP-62402-NG</span>
-                            <span className="text-xs font-serif text-emerald-400 font-bold">₹1,299 <span className="text-[9px] text-slate-500 line-through">₹1,599</span></span>
-                          </div>
-                        ) : selectedSchematic === 2 ? (
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-bold text-white block">Brembo Brake Pads Set</span>
-                            <span className="text-[9px] text-slate-400 block font-mono">OE Ref: BP-88120-SZ</span>
-                            <span className="text-xs font-serif text-emerald-400 font-bold">₹3,499 <span className="text-[9px] text-slate-500 line-through">₹3,899</span></span>
-                          </div>
-                        ) : (
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-bold text-slate-350 block">Select a part on blueprint</span>
-                            <p className="text-[9px] text-slate-500 leading-tight">Try clicking number ① or ② in the visual diagram catalog.</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </section>
