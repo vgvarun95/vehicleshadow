@@ -2474,6 +2474,8 @@ export default function Dashboard() {
         onViewChange={setVehicleSubView}
         selectedVehicle={selectedVehicleForDetail}
         onSelectVehicle={setSelectedVehicleForDetail}
+        selectedLicence={selectedLicenceForDetail}
+        onSelectLicence={setSelectedLicenceForDetail}
       />
     ),
     fasttag: (
