@@ -1528,6 +1528,10 @@ interface VehicleTabProps {
   setApiLicences?: React.Dispatch<React.SetStateAction<ApiLicence[] | null>>;
   apiVehicles?: ApiVehicle[] | null;
   setApiVehicles?: React.Dispatch<React.SetStateAction<ApiVehicle[] | null>>;
+  view?: View;
+  onViewChange?: (view: View) => void;
+  selectedVehicle?: typeof VEHICLES[0] | null;
+  onSelectVehicle?: (v: typeof VEHICLES[0] | null) => void;
 }
 
 export default function VehicleTab({
@@ -1535,13 +1539,22 @@ export default function VehicleTab({
   setApiLicences: propSetApiLicences,
   apiVehicles: propApiVehicles,
   setApiVehicles: propSetApiVehicles,
+  view: propView,
+  onViewChange: propOnViewChange,
+  selectedVehicle: propSelectedVehicle,
+  onSelectVehicle: propOnSelectVehicle,
 }: VehicleTabProps = {}) {
-  const [view,         setView]    = useState<View>("home");
-  const [selectedVehicle,setVehicle] = useState<typeof VEHICLES[0]|null>(null);
+  const [localView, setLocalView] = useState<View>("home");
+  const [localSelectedVehicle, setLocalSelectedVehicle] = useState<typeof VEHICLES[0]|null>(null);
   const [modal,        setModal]   = useState<"vehicle"|"licence"|"apply"|null>(null);
   const [localApiLicences, setLocalApiLicences] = useState<ApiLicence[] | null>(null);
   const [localApiVehicles, setLocalApiVehicles] = useState<ApiVehicle[] | null>(null);
   const [addLoading,   setAddLoading]   = useState(false);
+
+  const view = propView !== undefined ? propView : localView;
+  const setView = propOnViewChange !== undefined ? propOnViewChange : setLocalView;
+  const selectedVehicle = propSelectedVehicle !== undefined ? propSelectedVehicle : localSelectedVehicle;
+  const setVehicle = propOnSelectVehicle !== undefined ? propOnSelectVehicle : setLocalSelectedVehicle;
 
   const apiLicences = propApiLicences !== undefined ? propApiLicences : localApiLicences;
   const setApiLicences = propSetApiLicences !== undefined ? propSetApiLicences : setLocalApiLicences;

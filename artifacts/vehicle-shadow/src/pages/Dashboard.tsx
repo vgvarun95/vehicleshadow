@@ -2259,6 +2259,8 @@ export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [apiLicences, setApiLicences] = useState<ApiLicence[] | null>(null);
   const [apiVehicles, setApiVehicles] = useState<ApiVehicle[] | null>(null);
+  const [vehicleSubView, setVehicleSubView] = useState<"home" | "licences" | "vehicles" | "vehicle-detail">("home");
+  const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState<any | null>(null);
 
   useEffect(() => {
     api.licences.list().then(l => setApiLicences(l)).catch(() => setApiLicences(null));
@@ -2300,9 +2302,29 @@ export default function Dashboard() {
       }))
     : VEHICLES;
 
+  function handleNotificationClick(notif: { category: string; regNum?: string }) {
+    setActiveTab("vehicle");
+    if (notif.category === "licence") {
+      setVehicleSubView("licences");
+    } else if (notif.category === "vehicle") {
+      if (notif.regNum) {
+        const matchedVeh = displayVehicles.find(v => v.number === notif.regNum);
+        if (matchedVeh) {
+          setSelectedVehicleForDetail(matchedVeh);
+          setVehicleSubView("vehicle-detail");
+        } else {
+          setVehicleSubView("vehicles");
+        }
+      } else {
+        setVehicleSubView("vehicles");
+      }
+    }
+    setShowNotifications(false);
+  }
+
   // Generate notifications based on combined/api data
   const notifications = (() => {
-    const list: { id: string; title: string; desc: string; type: "expired" | "expiring" | "challan"; category: string }[] = [];
+    const list: { id: string; title: string; desc: string; type: "expired" | "expiring" | "challan"; category: string; regNum?: string }[] = [];
 
     displayLicences.forEach(lic => {
       if (lic.status === "expired") {
@@ -2331,7 +2353,8 @@ export default function Dashboard() {
           title: `Fitness Expired`,
           desc: `${veh.name} (${veh.number}) Fitness expired on ${veh.fitness.expiry}.`,
           type: "expired",
-          category: "vehicle"
+          category: "vehicle",
+          regNum: veh.number
         });
       } else if (veh.fitness.status === "expiring") {
         list.push({
@@ -2339,7 +2362,8 @@ export default function Dashboard() {
           title: `Fitness Expiring`,
           desc: `${veh.name} (${veh.number}) Fitness will expire on ${veh.fitness.expiry}.`,
           type: "expiring",
-          category: "vehicle"
+          category: "vehicle",
+          regNum: veh.number
         });
       }
 
@@ -2349,7 +2373,8 @@ export default function Dashboard() {
           title: `Insurance Expired`,
           desc: `${veh.name} (${veh.number}) Insurance expired on ${veh.insurance.expiry}.`,
           type: "expired",
-          category: "vehicle"
+          category: "vehicle",
+          regNum: veh.number
         });
       } else if (veh.insurance.status === "expiring") {
         list.push({
@@ -2357,7 +2382,8 @@ export default function Dashboard() {
           title: `Insurance Expiring`,
           desc: `${veh.name} (${veh.number}) Insurance will expire on ${veh.insurance.expiry}.`,
           type: "expiring",
-          category: "vehicle"
+          category: "vehicle",
+          regNum: veh.number
         });
       }
 
@@ -2367,7 +2393,8 @@ export default function Dashboard() {
           title: `PUC Expired`,
           desc: `${veh.name} (${veh.number}) PUC expired on ${veh.puc.expiry}.`,
           type: "expired",
-          category: "vehicle"
+          category: "vehicle",
+          regNum: veh.number
         });
       } else if (veh.puc.status === "expiring") {
         list.push({
@@ -2375,7 +2402,8 @@ export default function Dashboard() {
           title: `PUC Expiring`,
           desc: `${veh.name} (${veh.number}) PUC will expire on ${veh.puc.expiry}.`,
           type: "expiring",
-          category: "vehicle"
+          category: "vehicle",
+          regNum: veh.number
         });
       }
 
@@ -2385,7 +2413,8 @@ export default function Dashboard() {
           title: `Pending Challans`,
           desc: `${veh.name} (${veh.number}) has ${veh.challans.length} pending challans.`,
           type: "challan",
-          category: "vehicle"
+          category: "vehicle",
+          regNum: veh.number
         });
       }
     });
@@ -2402,6 +2431,10 @@ export default function Dashboard() {
         setApiLicences={setApiLicences}
         apiVehicles={apiVehicles}
         setApiVehicles={setApiVehicles}
+        view={vehicleSubView}
+        onViewChange={setVehicleSubView}
+        selectedVehicle={selectedVehicleForDetail}
+        onSelectVehicle={setSelectedVehicleForDetail}
       />
     ),
     fasttag: <FasttagTab />,
@@ -2509,7 +2542,11 @@ export default function Dashboard() {
                         notifications.map((notif) => {
                           const iconColor = notif.type === "expired" ? "text-red-650 bg-red-50 border-red-150" : notif.type === "expiring" ? "text-yellow-650 bg-yellow-50 border-yellow-150" : "text-orange-650 bg-orange-50 border-orange-150";
                           return (
-                            <div key={notif.id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex gap-2.5 items-start transition-all hover:bg-slate-100">
+                            <div
+                              key={notif.id}
+                              onClick={() => handleNotificationClick(notif)}
+                              className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex gap-2.5 items-start transition-all hover:bg-slate-100 cursor-pointer"
+                            >
                               <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border ${iconColor}`}>
                                 {notif.type === "expired" ? (
                                   <AlertTriangle className="w-4 h-4" />
