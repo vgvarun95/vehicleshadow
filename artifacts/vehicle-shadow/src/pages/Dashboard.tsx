@@ -2495,10 +2495,10 @@ export default function Dashboard() {
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-black uppercase tracking-wider text-red-700">Attention Required</p>
                           <p className="text-xs font-bold mt-0.5 leading-snug">
-                            Tumhari {expiredCount} {expiredCount === 1 ? "cheez" : "cheezein"} expire ho chuki {expiredCount === 1 ? "hai" : "hain"}!
+                            Your {expiredCount} document{expiredCount !== 1 ? "s have" : " has"} expired!
                           </p>
-                          <p className="text-[10px] text-slate-600 mt-0.5">
-                            Your {expiredCount} document{expiredCount > 1 ? "s have" : " has"} expired. Please renew immediately.
+                          <p className="text-[10px] text-slate-650 mt-0.5">
+                            Please check and renew the expired items immediately.
                           </p>
                         </div>
                       </div>
