@@ -371,62 +371,7 @@ function MallTab() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur-xl p-5 grid lg:grid-cols-12 gap-6 items-center shadow-sm">
-        <div className="lg:col-span-7 flex flex-col items-center justify-center bg-slate-50 rounded-xl p-4 border border-slate-100 relative min-h-[220px]">
-          <div className="absolute top-2.5 left-3 flex items-center gap-1.5 text-[10px] font-bold text-primary/80 uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 animate-pulse"/> Interactive Schematic Catalog (Exploded View)
-          </div>
 
-          <svg className="w-full max-w-[340px] h-[180px] text-slate-400 mt-4" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="70" y="40" width="80" height="90" rx="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 2" />
-            <line x1="70" y1="70" x2="150" y2="70" stroke="currentColor" strokeWidth="1" />
-            <line x1="70" y1="100" x2="150" y2="100" stroke="currentColor" strokeWidth="1" />
-            <rect x="85" y="50" width="50" height="15" rx="2" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.5" />
-            <line x1="110" y1="65" x2="110" y2="120" stroke="currentColor" strokeWidth="2.5" />
-            <line x1="110" y1="20" x2="110" y2="40" stroke="currentColor" strokeWidth="2" />
-            <circle cx="110" cy="20" r="3" fill="currentColor" />
-            <circle cx="280" cy="95" r="45" stroke="currentColor" strokeWidth="2" strokeDasharray="2 2" />
-            <circle cx="280" cy="95" r="30" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity="0.05" />
-            <path d="M245 70 C245 50, 275 40, 290 40 C305 40, 315 50, 315 75 L300 75 C300 60, 290 55, 280 55 C270 55, 260 60, 260 70 Z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M330 40 L350 40 M340 40 L340 130 M330 130 L350 130" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M330 55 Q350 62 330 70 Q350 78 330 85 Q350 92 330 100 Q350 107 330 115" stroke="currentColor" strokeWidth="2" fill="none" />
-            
-            <circle cx="110" cy="30" r="14" fill="#7c3aed" fillOpacity="0.2" className="cursor-pointer" />
-            <circle cx="260" cy="55" r="14" fill="#7c3aed" fillOpacity="0.2" className="cursor-pointer" />
-            <circle cx="110" cy="95" r="14" fill="#7c3aed" fillOpacity="0.2" className="cursor-pointer" />
-            <circle cx="340" cy="85" r="14" fill="#7c3aed" fillOpacity="0.2" className="cursor-pointer" />
-          </svg>
-
-          <button onClick={() => { setSelectedSchematicPart(1); setBroadCat("Engine"); setSubCat("Spark Plugs"); }} className={`absolute top-[10%] left-[23%] px-1.5 py-0.5 rounded bg-primary text-white text-[9px] font-bold flex items-center gap-0.5 border border-white/10 shadow transition-all cursor-pointer ${selectedSchematicPart===1?"scale-115 bg-green-600 ring-2 ring-white/50":""}`}>① Spark Plugs</button>
-          <button onClick={() => { setSelectedSchematicPart(2); setBroadCat("Brakes"); setSubCat("Brake Pads"); }} className={`absolute top-[18%] left-[54%] px-1.5 py-0.5 rounded bg-primary text-white text-[9px] font-bold flex items-center gap-0.5 border border-white/10 shadow transition-all cursor-pointer ${selectedSchematicPart===2?"scale-115 bg-green-600 ring-2 ring-white/50":""}`}>② Brake Pads</button>
-          <button onClick={() => { setSelectedSchematicPart(3); setBroadCat("Filters & Fluids"); setSubCat("Engine Oil 5W-40"); }} className={`absolute top-[48%] left-[23%] px-1.5 py-0.5 rounded bg-primary text-white text-[9px] font-bold flex items-center gap-0.5 border border-white/10 shadow transition-all cursor-pointer ${selectedSchematicPart===3?"scale-115 bg-green-600 ring-2 ring-white/50":""}`}>③ Engine Oil</button>
-          <button onClick={() => { setSelectedSchematicPart(4); setBroadCat("Suspension"); setSubCat("Shock Absorber"); }} className={`absolute top-[40%] left-[73%] px-1.5 py-0.5 rounded bg-primary text-white text-[9px] font-bold flex items-center gap-0.5 border border-white/10 shadow transition-all cursor-pointer ${selectedSchematicPart===4?"scale-115 bg-green-600 ring-2 ring-white/50":""}`}>④ Shock Absorbers</button>
-        </div>
-
-        <div className="lg:col-span-5 space-y-3">
-          <p className="text-sm font-bold text-slate-900">Schematic Catalog Filter</p>
-          <p className="text-xs text-slate-700 font-medium leading-relaxed">Select a numbered component on the mechanical blueprint view to quickly filter the catalog parts listing below.</p>
-
-          {selectedSchematicPart ? (
-            <div className="p-3 bg-primary/5 border border-primary/15 rounded-xl space-y-1.5 shadow-2xs">
-              <p className="text-xs font-bold text-primary flex items-center gap-1">
-                <BadgeCheck className="w-4 h-4"/> Active Schematic Target:
-              </p>
-              <p className="text-xs font-bold text-slate-900">
-                {selectedSchematicPart === 1 ? "Engine Parts -> Spark Plugs" :
-                 selectedSchematicPart === 2 ? "Brake System -> Brake Pads Set" :
-                 selectedSchematicPart === 3 ? "Filters & Fluids -> Engine Oil" :
-                 "Suspension -> Shock Absorber Pair"}
-              </p>
-              <button onClick={() => { setSelectedSchematicPart(null); setBroadCat(""); setSubCat(""); }} className="text-[10px] text-primary hover:underline font-bold mt-1 block cursor-pointer">Clear Schematic Selection</button>
-            </div>
-          ) : (
-            <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-center text-xs text-slate-500 font-medium">
-              No schematic component selected. Click on diagram numbers to test.
-            </div>
-          )}
-        </div>
-      </div>
 
       <div className="space-y-2">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Browse Categories</p>
