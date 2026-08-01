@@ -1530,14 +1530,21 @@ function GpsTab() {
 }
 
 /* ---- Fasttag Management ---- */
-function FasttagTab() {
+function FasttagTab({
+  selectedVehicle: propSelectedVehicle,
+  setSelectedVehicle: propSetSelectedVehicle,
+  vehicleSearchQuery: propVehicleSearchQuery,
+  setVehicleSearchQuery: propSetVehicleSearchQuery,
+  searchQuery: propSearchQuery,
+  setSearchQuery: propSetSearchQuery,
+}: any = {}) {
   const [balances, setBalances] = useState<Record<string, number>>({
     "HR26DJ5432": 750.00,
     "MH12AB1234": 200.00
   });
   const [rechargeAmt, setRechargeAmt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState("All");
+  const [localSelectedVehicle, setLocalSelectedVehicle] = useState("All");
   const [vehicles, setVehicles] = useState([
     { num: "HR26DJ5432", model: "Maruti Suzuki Swift", status: "Active", ftg: "TAG_99210041" },
     { num: "MH12AB1234", model: "Hyundai Creta", status: "Active", ftg: "TAG_77182049" }
@@ -1554,8 +1561,15 @@ function FasttagTab() {
     { id: "TXN100295", date: "20 Jun 2026, 06:10 PM", plaza: "Kherki Daula Toll Plaza (NH48)", amt: 80.00, status: "Success", vehicle: "HR26DJ5432" }
   ]);
   const [message, setMessage] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [vehicleSearchQuery, setVehicleSearchQuery] = useState("");
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
+  const [localVehicleSearchQuery, setLocalVehicleSearchQuery] = useState("");
+
+  const selectedVehicle = propSelectedVehicle !== undefined ? propSelectedVehicle : localSelectedVehicle;
+  const setSelectedVehicle = propSetSelectedVehicle !== undefined ? propSetSelectedVehicle : setLocalSelectedVehicle;
+  const searchQuery = propSearchQuery !== undefined ? propSearchQuery : localSearchQuery;
+  const setSearchQuery = propSetSearchQuery !== undefined ? propSetSearchQuery : setLocalSearchQuery;
+  const vehicleSearchQuery = propVehicleSearchQuery !== undefined ? propVehicleSearchQuery : localVehicleSearchQuery;
+  const setVehicleSearchQuery = propSetVehicleSearchQuery !== undefined ? propSetVehicleSearchQuery : setLocalVehicleSearchQuery;
 
   // Sync recharge target automatically if a specific active vehicle is selected
   useEffect(() => {
@@ -2261,6 +2275,9 @@ export default function Dashboard() {
   const [apiVehicles, setApiVehicles] = useState<ApiVehicle[] | null>(null);
   const [vehicleSubView, setVehicleSubView] = useState<"home" | "licences" | "vehicles" | "vehicle-detail">("home");
   const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState<any | null>(null);
+  const [fasttagSelectedVehicle, setFasttagSelectedVehicle] = useState("All");
+  const [fasttagVehicleSearch, setFasttagVehicleSearch] = useState("");
+  const [fasttagLogSearch, setFasttagLogSearch] = useState("");
 
   useEffect(() => {
     api.licences.list().then(l => setApiLicences(l)).catch(() => setApiLicences(null));
@@ -2320,6 +2337,18 @@ export default function Dashboard() {
       }
     }
     setShowNotifications(false);
+  }
+
+  function handleTabSelect(id: Tab) {
+    setActiveTab(id);
+    if (id === "vehicle") {
+      setVehicleSubView("home");
+      setSelectedVehicleForDetail(null);
+    } else if (id === "fasttag") {
+      setFasttagSelectedVehicle("All");
+      setFasttagVehicleSearch("");
+      setFasttagLogSearch("");
+    }
   }
 
   // Generate notifications based on combined/api data
@@ -2437,7 +2466,16 @@ export default function Dashboard() {
         onSelectVehicle={setSelectedVehicleForDetail}
       />
     ),
-    fasttag: <FasttagTab />,
+    fasttag: (
+      <FasttagTab
+        selectedVehicle={fasttagSelectedVehicle}
+        setSelectedVehicle={setFasttagSelectedVehicle}
+        vehicleSearchQuery={fasttagVehicleSearch}
+        setVehicleSearchQuery={setFasttagVehicleSearch}
+        searchQuery={fasttagLogSearch}
+        setSearchQuery={setFasttagLogSearch}
+      />
+    ),
     mall: <MallTab />,
     mechanic: <MechanicTab />,
     dashcam: <DashcamTab />,
@@ -2463,7 +2501,7 @@ export default function Dashboard() {
               return (
                 <button
                   key={id}
-                  onClick={() => setActiveTab(id)}
+                  onClick={() => handleTabSelect(id)}
                   data-testid={`tab-${id}`}
                   className={`flex items-center gap-2 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition-all relative cursor-pointer ${
                     isActive
@@ -2593,7 +2631,7 @@ export default function Dashboard() {
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
             return (
-              <button key={id} onClick={() => setActiveTab(id)} data-testid={`tab-mobile-${id}`}
+              <button key={id} onClick={() => handleTabSelect(id)} data-testid={`tab-mobile-${id}`}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 cursor-pointer ${
                   isActive
                     ? "bg-primary text-white shadow-lg shadow-primary/20"
