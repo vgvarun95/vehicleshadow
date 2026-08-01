@@ -1555,6 +1555,7 @@ function FasttagTab() {
   ]);
   const [message, setMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [vehicleSearchQuery, setVehicleSearchQuery] = useState("");
 
   // Sync recharge target automatically if a specific active vehicle is selected
   useEffect(() => {
@@ -1762,36 +1763,71 @@ function FasttagTab() {
               </button>
             </div>
             
+            {/* Search Input bar */}
+            <div className="relative mb-3.5">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <Search className="w-3.5 h-3.5" />
+              </span>
+              <input
+                type="text"
+                value={vehicleSearchQuery}
+                onChange={e => setVehicleSearchQuery(e.target.value)}
+                placeholder="Search vehicle..."
+                className="w-full bg-slate-50 border border-slate-200 focus:border-primary/60 focus:bg-white rounded-xl pl-8.5 pr-8 py-1.5 text-[11px] font-bold outline-none transition-all"
+              />
+              {vehicleSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setVehicleSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-450 hover:text-slate-755 text-xs font-black cursor-pointer bg-transparent border-none"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
             <div className="space-y-3">
-              {vehicles.map(v => {
-                const isSelected = selectedVehicle === v.num;
-                return (
-                  <div
-                    key={v.num}
-                    onClick={() => setSelectedVehicle(v.num)}
-                    className={`border rounded-2xl p-4 flex justify-between items-center cursor-pointer transition-all hover:scale-[1.01] ${
-                      isSelected
-                        ? "bg-primary/5 border-primary shadow-sm"
-                        : "bg-slate-50/50 border-slate-200 hover:bg-slate-100/50"
-                    }`}
-                  >
-                    <div>
-                      <span className="font-mono text-sm font-black text-slate-950 block">{v.num}</span>
-                      <span className="text-[10px] text-slate-500 font-bold block mt-0.5">{v.model}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-full border block mb-1 ${
-                        v.status === "Active"
-                          ? "bg-emerald-50 border-emerald-150 text-emerald-600"
-                          : "bg-yellow-50 border-yellow-150 text-yellow-600"
-                      }`}>
-                        {v.status}
-                      </span>
-                      <span className="text-[9px] text-slate-400 font-mono block">{v.ftg}</span>
-                    </div>
+              {(() => {
+                const filteredVehicles = vehicles.filter(v => 
+                  v.num.toLowerCase().includes(vehicleSearchQuery.trim().toLowerCase()) ||
+                  v.model.toLowerCase().includes(vehicleSearchQuery.trim().toLowerCase())
+                );
+                return filteredVehicles.length > 0 ? (
+                  filteredVehicles.map(v => {
+                    const isSelected = selectedVehicle === v.num;
+                    return (
+                      <div
+                        key={v.num}
+                        onClick={() => setSelectedVehicle(v.num)}
+                        className={`border rounded-2xl p-4 flex justify-between items-center cursor-pointer transition-all hover:scale-[1.01] ${
+                          isSelected
+                            ? "bg-primary/5 border-primary shadow-sm"
+                            : "bg-slate-50/50 border-slate-200 hover:bg-slate-100/50"
+                        }`}
+                      >
+                        <div>
+                          <span className="font-mono text-sm font-black text-slate-950 block">{v.num}</span>
+                          <span className="text-[10px] text-slate-500 font-bold block mt-0.5">{v.model}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-full border block mb-1 ${
+                            v.status === "Active"
+                              ? "bg-emerald-50 border-emerald-150 text-emerald-600"
+                              : "bg-yellow-50 border-yellow-150 text-yellow-600"
+                          }`}>
+                            {v.status}
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-mono block">{v.ftg}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-6 text-slate-400 text-xs font-bold">
+                    No matching vehicles found
                   </div>
                 );
-              })}
+              })()}
             </div>
           </div>
 
