@@ -1554,6 +1554,7 @@ function FasttagTab() {
     { id: "TXN100295", date: "20 Jun 2026, 06:10 PM", plaza: "Kherki Daula Toll Plaza (NH48)", amt: 80.00, status: "Success", vehicle: "HR26DJ5432" }
   ]);
   const [message, setMessage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Sync recharge target automatically if a specific active vehicle is selected
   useEffect(() => {
@@ -1634,10 +1635,20 @@ function FasttagTab() {
     setRechargeTarget(vehNum);
   }
 
-  // Filtered transactions based on selected vehicle
+  // Filtered transactions based on selected vehicle and search query
   const filteredTx = txHistory.filter(t => {
-    if (selectedVehicle === "All") return true;
-    return t.vehicle === selectedVehicle;
+    const matchesVehicle = selectedVehicle === "All" || t.vehicle === selectedVehicle;
+    const cleanQuery = searchQuery.trim().toLowerCase();
+    if (!cleanQuery) return matchesVehicle;
+
+    const matchesSearch = 
+      t.plaza.toLowerCase().includes(cleanQuery) ||
+      t.id.toLowerCase().includes(cleanQuery) ||
+      t.vehicle.toLowerCase().includes(cleanQuery) ||
+      t.amt.toString().includes(cleanQuery) ||
+      (t.status && t.status.toLowerCase().includes(cleanQuery));
+
+    return matchesVehicle && matchesSearch;
   });
 
   // Display balance logic
@@ -1898,6 +1909,29 @@ function FasttagTab() {
               <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2.5 py-1 rounded-full">
                 {filteredTx.length} Transaction{filteredTx.length !== 1 ? "s" : ""}
               </span>
+            </div>
+
+            {/* Search Input bar */}
+            <div className="relative mb-4">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <Search className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search by Plaza, TXN ID, Vehicle No., or Status..."
+                className="w-full bg-slate-50 border border-slate-200 focus:border-primary/60 focus:bg-white rounded-xl pl-9 pr-8 py-2 text-xs font-bold outline-none transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-450 hover:text-slate-750 text-xs font-black cursor-pointer bg-transparent border-none"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
             <div className="space-y-3 overflow-y-auto max-h-[350px] pr-1">
