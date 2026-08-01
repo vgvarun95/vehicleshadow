@@ -1282,8 +1282,22 @@ type VehRow = typeof VEHICLES[0];
 type LicRow = { id:number; dlNumber:string; name:string; dob:string; issueDate:string; expiry:string; status:"valid"|"expired"|"expiring"; vehicleClass:string; address:string };
 
 /* ─────────────── LICENCE LIST PAGE ─────────────── */
-function LicencesPageWithData({ licences, onBack, onModal }: { licences:LicRow[]; onBack:()=>void; onModal:(m:"licence"|"apply")=>void }) {
-  const [selectedLic, setSelectedLic] = useState<LicRow | null>(null);
+function LicencesPageWithData({
+  licences,
+  onBack,
+  onModal,
+  selectedLicence: propSelectedLicence,
+  onSelectLicence: propOnSelectLicence,
+}: {
+  licences: LicRow[];
+  onBack: () => void;
+  onModal: (m: "licence" | "apply") => void;
+  selectedLicence?: any | null;
+  onSelectLicence?: (lic: any | null) => void;
+}) {
+  const [localSelectedLic, setLocalSelectedLic] = useState<LicRow | null>(null);
+  const selectedLic = propSelectedLicence !== undefined ? propSelectedLicence : localSelectedLic;
+  const setSelectedLic = propOnSelectLicence !== undefined ? propOnSelectLicence : setLocalSelectedLic;
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"default" | "action">("default");
 
@@ -1532,6 +1546,8 @@ interface VehicleTabProps {
   onViewChange?: (view: View) => void;
   selectedVehicle?: typeof VEHICLES[0] | null;
   onSelectVehicle?: (v: typeof VEHICLES[0] | null) => void;
+  selectedLicence?: any | null;
+  onSelectLicence?: (lic: any | null) => void;
 }
 
 export default function VehicleTab({
@@ -1543,9 +1559,12 @@ export default function VehicleTab({
   onViewChange: propOnViewChange,
   selectedVehicle: propSelectedVehicle,
   onSelectVehicle: propOnSelectVehicle,
+  selectedLicence: propSelectedLicence,
+  onSelectLicence: propOnSelectLicence,
 }: VehicleTabProps = {}) {
   const [localView, setLocalView] = useState<View>("home");
   const [localSelectedVehicle, setLocalSelectedVehicle] = useState<typeof VEHICLES[0]|null>(null);
+  const [localSelectedLicence, setLocalSelectedLicence] = useState<any|null>(null);
   const [modal,        setModal]   = useState<"vehicle"|"licence"|"apply"|null>(null);
   const [localApiLicences, setLocalApiLicences] = useState<ApiLicence[] | null>(null);
   const [localApiVehicles, setLocalApiVehicles] = useState<ApiVehicle[] | null>(null);
@@ -1555,6 +1574,8 @@ export default function VehicleTab({
   const setView = propOnViewChange !== undefined ? propOnViewChange : setLocalView;
   const selectedVehicle = propSelectedVehicle !== undefined ? propSelectedVehicle : localSelectedVehicle;
   const setVehicle = propOnSelectVehicle !== undefined ? propOnSelectVehicle : setLocalSelectedVehicle;
+  const selectedLicence = propSelectedLicence !== undefined ? propSelectedLicence : localSelectedLicence;
+  const setSelectedLicence = propOnSelectLicence !== undefined ? propOnSelectLicence : setLocalSelectedLicence;
 
   const apiLicences = propApiLicences !== undefined ? propApiLicences : localApiLicences;
   const setApiLicences = propSetApiLicences !== undefined ? propSetApiLicences : setLocalApiLicences;
@@ -1652,7 +1673,7 @@ export default function VehicleTab({
           <HomePage key="home" licences={displayLicences} vehicles={displayVehicles} onNav={v=>setView(v)}/>
         )}
         {view==="licences" && (
-          <LicencesPageWithData key="licences" licences={displayLicences} onBack={()=>setView("home")} onModal={m=>setModal(m)}/>
+          <LicencesPageWithData key="licences" licences={displayLicences} onBack={()=>setView("home")} onModal={m=>setModal(m)} selectedLicence={selectedLicence} onSelectLicence={setSelectedLicence}/>
         )}
         {view==="vehicles" && (
           <VehiclesPageWithData key="vehicles" vehicles={displayVehicles} onBack={()=>setView("home")} onSelect={goVehicleDetail} onModal={()=>setModal("vehicle")}/>

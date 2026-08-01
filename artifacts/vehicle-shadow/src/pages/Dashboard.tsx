@@ -2278,6 +2278,7 @@ export default function Dashboard() {
   const [fasttagSelectedVehicle, setFasttagSelectedVehicle] = useState("All");
   const [fasttagVehicleSearch, setFasttagVehicleSearch] = useState("");
   const [fasttagLogSearch, setFasttagLogSearch] = useState("");
+  const [selectedLicenceForDetail, setSelectedLicenceForDetail] = useState<any | null>(null);
 
   useEffect(() => {
     api.licences.list().then(l => setApiLicences(l)).catch(() => setApiLicences(null));
@@ -2319,10 +2320,16 @@ export default function Dashboard() {
       }))
     : VEHICLES;
 
-  function handleNotificationClick(notif: { category: string; regNum?: string }) {
+  function handleNotificationClick(notif: { category: string; regNum?: string; dlNumber?: string }) {
     setActiveTab("vehicle");
     if (notif.category === "licence") {
       setVehicleSubView("licences");
+      if (notif.dlNumber) {
+        const matchedLic = displayLicences.find(l => l.dlNumber === notif.dlNumber);
+        if (matchedLic) {
+          setSelectedLicenceForDetail(matchedLic);
+        }
+      }
     } else if (notif.category === "vehicle") {
       if (notif.regNum) {
         const matchedVeh = displayVehicles.find(v => v.number === notif.regNum);
@@ -2344,6 +2351,7 @@ export default function Dashboard() {
     if (id === "vehicle") {
       setVehicleSubView("home");
       setSelectedVehicleForDetail(null);
+      setSelectedLicenceForDetail(null);
     } else if (id === "fasttag") {
       setFasttagSelectedVehicle("All");
       setFasttagVehicleSearch("");
@@ -2353,7 +2361,7 @@ export default function Dashboard() {
 
   // Generate notifications based on combined/api data
   const notifications = (() => {
-    const list: { id: string; title: string; desc: string; type: "expired" | "expiring" | "challan"; category: string; regNum?: string }[] = [];
+    const list: { id: string; title: string; desc: string; type: "expired" | "expiring" | "challan"; category: string; regNum?: string; dlNumber?: string }[] = [];
 
     displayLicences.forEach(lic => {
       if (lic.status === "expired") {
@@ -2362,7 +2370,8 @@ export default function Dashboard() {
           title: `Licence Expired`,
           desc: `${lic.name}'s DL (${lic.dlNumber}) expired on ${lic.expiry}.`,
           type: "expired",
-          category: "licence"
+          category: "licence",
+          dlNumber: lic.dlNumber
         });
       } else if (lic.status === "expiring") {
         list.push({
@@ -2370,7 +2379,8 @@ export default function Dashboard() {
           title: `Licence Expiring Soon`,
           desc: `${lic.name}'s DL (${lic.dlNumber}) will expire on ${lic.expiry}.`,
           type: "expiring",
-          category: "licence"
+          category: "licence",
+          dlNumber: lic.dlNumber
         });
       }
     });
