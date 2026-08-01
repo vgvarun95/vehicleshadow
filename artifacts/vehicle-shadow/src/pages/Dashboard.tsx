@@ -1652,84 +1652,87 @@ function FasttagTab() {
         {/* Left Sidebar: Apply, Add and Linked Vehicles (col-span-4) */}
         <div className="lg:col-span-4 space-y-6">
           
-          {/* Apply for New FASTag Card */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
-            <h3 className="font-extrabold text-slate-950 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Plus className="w-4 h-4 text-primary" /> Apply New FASTag
-            </h3>
-            <p className="text-slate-500 text-[10px] mb-3">Get a new high-speed RFID tag delivered to your doorstep.</p>
+          {/* Apply & Add side-by-side row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
             
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const input = form.elements.namedItem("vehNum") as HTMLInputElement;
-                const cleanNum = input.value.trim().toUpperCase();
-                if (!cleanNum) return;
-                handleApplyNew(cleanNum);
-                input.value = "";
-                setMessage("FASTag application submitted successfully!");
-                setTimeout(() => setMessage(null), 4000);
-              }}
-              className="space-y-3"
-            >
+            {/* Apply for New FASTag Card */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs flex flex-col justify-between">
               <div>
-                <label className="text-[10px] text-slate-500 font-semibold mb-1 block">Vehicle Number</label>
-                <input
-                  name="vehNum"
-                  type="text"
-                  placeholder="e.g. DL3CA1234"
-                  required
-                  className="w-full bg-slate-50 border border-slate-200 focus:border-primary/60 focus:bg-white rounded-xl px-3 py-2 text-xs font-bold outline-none transition-all"
-                />
+                <h3 className="font-extrabold text-slate-950 text-[11px] uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <Plus className="w-3.5 h-3.5 text-primary" /> Apply New
+                </h3>
               </div>
-              <Button
-                type="submit"
-                className="w-full bg-primary hover:bg-primary/95 text-white rounded-xl text-[11px] font-extrabold py-2 px-4 cursor-pointer"
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const input = form.elements.namedItem("vehNum") as HTMLInputElement;
+                  const cleanNum = input.value.trim().toUpperCase();
+                  if (!cleanNum) return;
+                  handleApplyNew(cleanNum);
+                  input.value = "";
+                  setMessage("FASTag application submitted successfully!");
+                  setTimeout(() => setMessage(null), 4000);
+                }}
+                className="space-y-3"
               >
-                Apply Now
-              </Button>
-            </form>
-          </div>
+                <div>
+                  <input
+                    name="vehNum"
+                    type="text"
+                    placeholder="Vehicle No."
+                    required
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-primary/60 focus:bg-white rounded-xl px-2.5 py-1.5 text-[11px] font-bold outline-none transition-all"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-primary hover:bg-primary/95 text-white rounded-xl text-[10px] font-extrabold py-1.5 px-3 cursor-pointer"
+                >
+                  Apply
+                </Button>
+              </form>
+            </div>
 
-          {/* Add Existing FASTag Card */}
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
-            <h3 className="font-extrabold text-slate-950 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Plus className="w-4 h-4 text-emerald-600" /> Add Existing FASTag
-            </h3>
-            <p className="text-slate-500 text-[10px] mb-3">Link your already active FASTag to your vehicle shadow account.</p>
-            
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const input = form.elements.namedItem("vehNum") as HTMLInputElement;
-                const cleanNum = input.value.trim().toUpperCase();
-                if (!cleanNum) return;
-                handleAddExisting(cleanNum);
-                input.value = "";
-                setMessage("FASTag linked successfully!");
-                setTimeout(() => setMessage(null), 4000);
-              }}
-              className="space-y-3"
-            >
+            {/* Add Existing FASTag Card */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs flex flex-col justify-between">
               <div>
-                <label className="text-[10px] text-slate-500 font-semibold mb-1 block">Vehicle Number</label>
-                <input
-                  name="vehNum"
-                  type="text"
-                  placeholder="e.g. MH12CD5678"
-                  required
-                  className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 focus:bg-white rounded-xl px-3 py-2 text-xs font-bold outline-none transition-all"
-                />
+                <h3 className="font-extrabold text-slate-950 text-[11px] uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <Plus className="w-3.5 h-3.5 text-emerald-600" /> Add Tag
+                </h3>
               </div>
-              <Button
-                type="submit"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-extrabold py-2 px-4 cursor-pointer"
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const input = form.elements.namedItem("vehNum") as HTMLInputElement;
+                  const cleanNum = input.value.trim().toUpperCase();
+                  if (!cleanNum) return;
+                  handleAddExisting(cleanNum);
+                  input.value = "";
+                  setMessage("FASTag linked successfully!");
+                  setTimeout(() => setMessage(null), 4000);
+                }}
+                className="space-y-3"
               >
-                Add Tag
-              </Button>
-            </form>
+                <div>
+                  <input
+                    name="vehNum"
+                    type="text"
+                    placeholder="Vehicle No."
+                    required
+                    className="w-full bg-slate-55 border border-slate-200 focus:border-emerald-600 focus:bg-white rounded-xl px-2.5 py-1.5 text-[11px] font-bold outline-none transition-all"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-extrabold py-1.5 px-3 cursor-pointer"
+                >
+                  Add
+                </Button>
+              </form>
+            </div>
+
           </div>
 
           {/* Linked Vehicles Card */}
