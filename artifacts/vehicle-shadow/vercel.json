@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://your-api-backend-url.onrender.com/api/:path*"
+      "destination": "https://vehicleshadow.onrender.com/api/:path*"
     }
   ]
 }
