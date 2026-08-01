@@ -23,7 +23,7 @@ type Tab = "vehicle" | "fasttag" | "mall" | "mechanic" | "dashcam" | "gps";
 
 const tabs: { id: Tab; label: string; icon: any }[] = [
   { id: "vehicle",   label: "Your Dashboard", icon: Car },
-  { id: "fasttag",   label: "Fasttag",        icon: Banknote },
+  { id: "fasttag",   label: "FASTag",        icon: Banknote },
   { id: "mall",      label: "Vehicle mall",   icon: ShoppingBag },
   { id: "mechanic",  label: "Mechanic support", icon: Wrench },
   { id: "dashcam",   label: "Dash CAM",       icon: Video },
