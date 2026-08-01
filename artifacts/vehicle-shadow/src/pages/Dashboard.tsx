@@ -1534,11 +1534,19 @@ function FasttagTab() {
   const [balance, setBalance] = useState(750.00);
   const [rechargeAmt, setRechargeAmt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState("All");
+  const [vehicles, setVehicles] = useState([
+    { num: "HR26DJ5432", model: "Maruti Suzuki Swift", status: "Active", ftg: "TAG_99210041" },
+    { num: "MH12AB1234", model: "Hyundai Creta", status: "Active", ftg: "TAG_77182049" }
+  ]);
   const [txHistory, setTxHistory] = useState([
-    { id: "TXN100821", date: "01 Aug 2026, 10:15 AM", plaza: "Kherki Daula Toll Plaza (NH88)", amt: 80.00, status: "Success", vehicle: "HR26DJ5432" },
+    { id: "TXN100821", date: "01 Aug 2026, 10:15 AM", plaza: "Kherki Daula Toll Plaza (NH48)", amt: 80.00, status: "Success", vehicle: "HR26DJ5432" },
     { id: "TXN100742", date: "28 Jul 2026, 08:30 AM", plaza: "Yamuna Expressway Plaza", amt: 165.00, status: "Success", vehicle: "HR26DJ5432" },
     { id: "TXN100619", date: "15 Jul 2026, 04:45 PM", plaza: "Mumbai-Pune Expressway Toll", amt: 320.00, status: "Success", vehicle: "MH12AB1234" },
-    { id: "TXN100588", date: "09 Jul 2026, 11:20 AM", plaza: "Gurgaon-Delhi Expressway", amt: 40.00, status: "Success", vehicle: "HR26DJ5432" }
+    { id: "TXN100588", date: "09 Jul 2026, 11:20 AM", plaza: "Gurgaon-Delhi Expressway", amt: 40.00, status: "Success", vehicle: "HR26DJ5432" },
+    { id: "TXN100412", date: "05 Jul 2026, 02:15 PM", plaza: "Khalapur Toll Plaza (Lonavala)", amt: 230.00, status: "Success", vehicle: "MH12AB1234" },
+    { id: "TXN100310", date: "28 Jun 2026, 09:30 AM", plaza: "Pune Ring Road Toll", amt: 55.00, status: "Success", vehicle: "MH12AB1234" },
+    { id: "TXN100295", date: "20 Jun 2026, 06:10 PM", plaza: "Kherki Daula Toll Plaza (NH48)", amt: 80.00, status: "Success", vehicle: "HR26DJ5432" }
   ]);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -1566,143 +1574,258 @@ function FasttagTab() {
     }, 1200);
   }
 
+  function handleNewApplication(vehNum: string) {
+    setVehicles(prev => [
+      ...prev,
+      {
+        num: vehNum,
+        model: "Applied (Pending Verification)",
+        status: "Pending",
+        ftg: `TAG_${Math.floor(10000000 + Math.random() * 90000000)}`
+      }
+    ]);
+  }
+
+  // Filtered transactions based on selected vehicle
+  const filteredTx = txHistory.filter(t => {
+    if (selectedVehicle === "All") return true;
+    return t.vehicle === selectedVehicle;
+  });
+
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* Top Banner & Wallet Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 bg-gradient-to-br from-indigo-900 to-slate-905 text-white rounded-3xl p-6 relative overflow-hidden shadow-xl border border-indigo-950 flex flex-col justify-between min-h-[220px]">
-          <div className="absolute top-0 right-0 -mr-6 -mt-6 w-36 h-36 bg-primary/20 rounded-full blur-3xl" />
-          <div className="flex items-center justify-between z-10">
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg tracking-wider bg-white/10 px-3 py-1 rounded-xl text-white/90">FASTag</span>
-              <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950">Active</span>
-            </div>
-            <CreditCard className="w-8 h-8 text-white/40" />
-          </div>
-          <div className="my-4 z-10">
-            <span className="text-xs text-white/60 font-semibold block mb-1">Total Wallet Balance</span>
-            <span className="text-3xl font-black">₹{balance.toFixed(2)}</span>
-          </div>
-          <div className="z-10 flex items-center justify-between text-xs text-white/50 font-mono">
-            <span>ID: FT-8829104-VS</span>
-            <span>HDFC Bank Linked</span>
-          </div>
-        </div>
-
-        {/* Quick Recharge Form */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between shadow-2xs">
-          <div>
-            <h3 className="font-extrabold text-base text-slate-950 flex items-center gap-2">
-              <Banknote className="w-5 h-5 text-primary" /> Recharge FASTag Wallet
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left Sidebar: Apply and Linked Vehicles (col-span-4) */}
+        <div className="lg:col-span-4 space-y-6">
+          
+          {/* Apply for New FASTag Card */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
+            <h3 className="font-extrabold text-slate-950 text-sm uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Plus className="w-4 h-4 text-primary" /> Apply New FASTag
             </h3>
-            <p className="text-slate-500 text-xs mt-1">Recharge instantly using UPI, NetBanking or Credit Cards.</p>
-          </div>
-
-          {message && (
-            <div className="bg-emerald-50 border border-emerald-250 text-emerald-900 rounded-xl p-3 text-xs font-bold my-3 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              {message}
-            </div>
-          )}
-
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-bold">₹</span>
-              <input
-                type="number"
-                value={rechargeAmt}
-                onChange={e => setRechargeAmt(e.target.value)}
-                placeholder="Enter amount"
-                className="w-full bg-slate-50 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-2xl pl-7 pr-3 py-2.5 text-sm font-extrabold outline-none transition-all"
-              />
-            </div>
-            <div className="flex gap-2">
-              {[100, 200, 500].map(amt => (
-                <button
-                  key={amt}
-                  onClick={() => handleRecharge(amt)}
-                  disabled={isLoading}
-                  className="bg-slate-100 hover:bg-slate-200 border border-slate-250 disabled:opacity-50 text-slate-800 text-xs font-extrabold px-3 py-2.5 rounded-xl transition-all cursor-pointer"
-                >
-                  +₹{amt}
-                </button>
-              ))}
-            </div>
-            <Button
-              onClick={() => handleRecharge()}
-              disabled={isLoading || !rechargeAmt}
-              className="bg-primary hover:bg-primary/90 rounded-2xl text-xs font-extrabold py-2.5 px-6 gap-2 shrink-0 cursor-pointer h-full text-white"
+            <p className="text-slate-500 text-[11px] mb-4">Get a new high-speed RFID tag delivered to your doorstep.</p>
+            
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const input = form.elements.namedItem("vehNum") as HTMLInputElement;
+                const cleanNum = input.value.trim().toUpperCase();
+                if (!cleanNum) return;
+                handleNewApplication(cleanNum);
+                input.value = "";
+                setMessage("FASTag application submitted successfully!");
+                setTimeout(() => setMessage(null), 4000);
+              }}
+              className="space-y-3"
             >
-              {isLoading ? "Processing..." : "Recharge Wallet"}
-            </Button>
+              <div>
+                <label className="text-[10px] text-slate-500 font-semibold mb-1 block">Vehicle Number</label>
+                <input
+                  name="vehNum"
+                  type="text"
+                  placeholder="e.g. DL3CA1234"
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-primary/60 focus:bg-white rounded-xl px-3 py-2 text-xs font-bold outline-none transition-all"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-primary hover:bg-primary/95 text-white rounded-xl text-xs font-extrabold py-2 px-4 cursor-pointer"
+              >
+                Apply Now
+              </Button>
+            </form>
           </div>
-        </div>
-      </div>
 
-      {/* Linked Vehicles & Transaction Logs */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Linked Vehicles list */}
-        <div className="lg:col-span-1 bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
-          <h3 className="font-extrabold text-slate-950 text-base mb-4">Linked Vehicles</h3>
-          <div className="space-y-3.5">
-            {[
-              { num: "HR26DJ5432", model: "Maruti Suzuki Swift", status: "Active", ftg: "TAG_99210041" },
-              { num: "MH12AB1234", model: "Hyundai Creta", status: "Active", ftg: "TAG_77182049" }
-            ].map(v => (
-              <div key={v.num} className="bg-slate-50 border border-slate-150 rounded-2xl p-4 flex justify-between items-center transition-all hover:bg-slate-100/70">
-                <div>
-                  <span className="font-mono text-sm font-black text-slate-950 block">{v.num}</span>
-                  <span className="text-[10px] text-slate-500 font-bold block mt-0.5">{v.model}</span>
+          {/* Linked Vehicles Card */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-extrabold text-slate-950 text-base">Linked Vehicles</h3>
+              <button
+                onClick={() => setSelectedVehicle("All")}
+                className={`text-[10px] font-black px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
+                  selectedVehicle === "All"
+                    ? "bg-primary text-white"
+                    : "bg-slate-100 text-slate-650 hover:bg-slate-200"
+                }`}
+              >
+                All Vehicles
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              {vehicles.map(v => {
+                const isSelected = selectedVehicle === v.num;
+                return (
+                  <div
+                    key={v.num}
+                    onClick={() => setSelectedVehicle(v.num)}
+                    className={`border rounded-2xl p-4 flex justify-between items-center cursor-pointer transition-all hover:scale-[1.01] ${
+                      isSelected
+                        ? "bg-primary/5 border-primary shadow-sm"
+                        : "bg-slate-50/50 border-slate-200 hover:bg-slate-100/50"
+                    }`}
+                  >
+                    <div>
+                      <span className="font-mono text-sm font-black text-slate-950 block">{v.num}</span>
+                      <span className="text-[10px] text-slate-500 font-bold block mt-0.5">{v.model}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded-full border block mb-1 ${
+                        v.status === "Active"
+                          ? "bg-emerald-50 border-emerald-150 text-emerald-600"
+                          : "bg-yellow-50 border-yellow-150 text-yellow-600"
+                      }`}>
+                        {v.status}
+                      </span>
+                      <span className="text-[9px] text-slate-400 font-mono block">{v.ftg}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Right Main Area: Wallet, Recharge & Toll Logs (col-span-8) */}
+        <div className="lg:col-span-8 space-y-6">
+          
+          {/* Top Row: Wallet Card and Recharge Form */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* FASTag Wallet Card */}
+            <div className="bg-gradient-to-br from-indigo-900 to-slate-905 text-white rounded-3xl p-6 relative overflow-hidden shadow-xl border border-indigo-950 flex flex-col justify-between min-h-[200px]">
+              <div className="absolute top-0 right-0 -mr-6 -mt-6 w-36 h-36 bg-primary/20 rounded-full blur-3xl" />
+              <div className="flex items-center justify-between z-10">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm tracking-wider bg-white/10 px-3 py-1 rounded-xl text-white/90">FASTag</span>
+                  <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950">Active</span>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-150 text-emerald-600 block mb-1">
-                    {v.status}
-                  </span>
-                  <span className="text-[9px] text-slate-400 font-mono block">{v.ftg}</span>
+                <CreditCard className="w-8 h-8 text-white/40" />
+              </div>
+              <div className="my-3 z-10">
+                <span className="text-[10px] text-white/60 font-semibold block mb-1">Total Wallet Balance</span>
+                <span className="text-3xl font-black">₹{balance.toFixed(2)}</span>
+              </div>
+              <div className="z-10 flex items-center justify-between text-[10px] text-white/50 font-mono">
+                <span>ID: FT-8829104-VS</span>
+                <span>HDFC Bank Linked</span>
+              </div>
+            </div>
+
+            {/* Recharge FASTag Wallet Box */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-2xs">
+              <div>
+                <h3 className="font-extrabold text-base text-slate-950 flex items-center gap-2">
+                  <Banknote className="w-5 h-5 text-primary" /> Recharge Wallet
+                </h3>
+                <p className="text-slate-500 text-[11px] mt-0.5">Recharge instantly using UPI, NetBanking or Cards.</p>
+              </div>
+
+              {message && message.includes("recharged") && (
+                <div className="bg-emerald-50 border border-emerald-250 text-emerald-900 rounded-xl p-2.5 text-xs font-bold my-2 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  {message}
+                </div>
+              )}
+
+              <div className="mt-3.5 space-y-3">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">₹</span>
+                    <input
+                      type="number"
+                      value={rechargeAmt}
+                      onChange={e => setRechargeAmt(e.target.value)}
+                      placeholder="Enter amount"
+                      className="w-full bg-slate-55 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-xl pl-6 pr-3 py-2 text-xs font-extrabold outline-none transition-all"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => handleRecharge()}
+                    disabled={isLoading || !rechargeAmt}
+                    className="bg-primary hover:bg-primary/90 rounded-xl text-xs font-extrabold py-2 px-4 cursor-pointer text-white h-full"
+                  >
+                    {isLoading ? "..." : "Recharge"}
+                  </Button>
+                </div>
+
+                <div className="flex gap-1.5">
+                  {[100, 200, 500].map(amt => (
+                    <button
+                      key={amt}
+                      onClick={() => handleRecharge(amt)}
+                      disabled={isLoading}
+                      className="bg-slate-100 hover:bg-slate-200 border border-slate-200 disabled:opacity-50 text-slate-800 text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-all cursor-pointer flex-1"
+                    >
+                      +₹{amt}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Transaction History log */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-extrabold text-slate-950 text-base">Toll & Recharge Logs</h3>
-            <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-full">All Vehicles</span>
           </div>
 
-          <div className="space-y-3 overflow-y-auto max-h-[350px] pr-1">
-            {txHistory.map((t) => {
-              const isRecharge = t.status === "Recharge";
-              return (
-                <div key={t.id} className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-150 bg-slate-50 hover:bg-slate-100/50 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${
-                      isRecharge
-                        ? "bg-emerald-50 border-emerald-150 text-emerald-600"
-                        : "bg-indigo-50 border-indigo-150 text-indigo-600"
-                    }`}>
-                      {isRecharge ? <Plus className="w-4.5 h-4.5" /> : <Milestone className="w-4.5 h-4.5" />}
+          {/* Toll & Recharge Logs Box */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="font-extrabold text-slate-950 text-base">Toll & Recharge Logs</h3>
+                <p className="text-slate-500 text-[11px] mt-0.5">
+                  Showing logs for: <span className="font-black text-slate-800">{selectedVehicle === "All" ? "All Vehicles" : selectedVehicle}</span>
+                </p>
+              </div>
+              <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2.5 py-1 rounded-full">
+                {filteredTx.length} Transaction{filteredTx.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+
+            <div className="space-y-3 overflow-y-auto max-h-[350px] pr-1">
+              {filteredTx.length > 0 ? (
+                filteredTx.map((t) => {
+                  const isRecharge = t.status === "Recharge";
+                  return (
+                    <div key={t.id} className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-150 bg-slate-50 hover:bg-slate-100/50 transition-all animate-fadeIn">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${
+                          isRecharge
+                            ? "bg-emerald-50 border-emerald-150 text-emerald-600"
+                            : "bg-indigo-50 border-indigo-150 text-indigo-600"
+                        }`}>
+                          {isRecharge ? <Plus className="w-4.5 h-4.5" /> : <Milestone className="w-4.5 h-4.5" />}
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-slate-950 block">{t.plaza}</span>
+                          <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">
+                            {t.date} • <span className="font-mono text-[9px] font-black">{t.vehicle}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`text-xs font-black block ${isRecharge ? "text-emerald-600" : "text-slate-900"}`}>
+                          {isRecharge ? "+" : "-"}₹{t.amt.toFixed(2)}
+                        </span>
+                        <span className="text-[9px] text-slate-400 font-mono block mt-0.5">{t.id}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-xs font-bold text-slate-950 block">{t.plaza}</span>
-                      <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">
-                        {t.date} • <span className="font-mono text-[9px]">{t.vehicle}</span>
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className={`text-xs font-black block ${isRecharge ? "text-emerald-600" : "text-slate-900"}`}>
-                      {isRecharge ? "+" : "-"}₹{t.amt.toFixed(2)}
-                    </span>
-                    <span className="text-[9px] text-slate-400 font-mono block mt-0.5">{t.id}</span>
-                  </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 text-slate-500 animate-fadeIn">
+                  <Milestone className="w-10 h-10 mx-auto opacity-30 mb-2" />
+                  <p className="text-xs font-bold">No Transactions Found</p>
+                  <p className="text-[10px] opacity-75">No toll debits recorded for this vehicle yet.</p>
                 </div>
-              );
-            })}
+              )}
+            </div>
           </div>
+
         </div>
+
       </div>
     </div>
   );
