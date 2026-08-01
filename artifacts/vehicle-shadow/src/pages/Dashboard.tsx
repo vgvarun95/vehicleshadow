@@ -12,19 +12,22 @@ import {
   Settings, Sparkles, Flame, BadgeCheck, ArrowRight, Timer, Banknote,
   Wifi, WifiOff, BatteryFull, Signal, Milestone, Route,
   LocateFixed, Shield, TriangleAlert, History, Map,
-  ChevronUp, Activity, Lock, Unlock, Share2, RefreshCw, ShieldAlert
+  ChevronUp, Activity, Lock, Unlock, Share2, RefreshCw, ShieldAlert,
+  Video, CreditCard, Plus, Play, Pause, Download, Trash2, Camera, Tv
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VehicleTab from "./VehicleTab";
 import { LICENCES, VEHICLES, type Challan } from "@/data/mockData";
 
-type Tab = "vehicle" | "mall" | "mechanic" | "gps";
+type Tab = "vehicle" | "fasttag" | "mall" | "mechanic" | "dashcam" | "gps";
 
-const tabs: { id: Tab; label: string; icon: typeof Car }[] = [
+const tabs: { id: Tab; label: string; icon: any }[] = [
   { id: "vehicle",   label: "Your Dashboard", icon: Car },
-  { id: "mall",      label: "Spare Parts Mall", icon: ShoppingBag },
-  { id: "mechanic",  label: "Mechanic Support", icon: Wrench },
-  { id: "gps",       label: "GPS System",       icon: MapPin },
+  { id: "fasttag",   label: "Fasttag",        icon: Banknote },
+  { id: "mall",      label: "Vehicle mall",   icon: ShoppingBag },
+  { id: "mechanic",  label: "Mechanic support", icon: Wrench },
+  { id: "dashcam",   label: "Dash CAM",       icon: Video },
+  { id: "gps",       label: "Find you vehicle", icon: MapPin },
 ];
 
 /* ---- Spare Parts Mall ---- */
@@ -1526,7 +1529,429 @@ function GpsTab() {
   );
 }
 
+/* ---- Fasttag Management ---- */
+function FasttagTab() {
+  const [balance, setBalance] = useState(750.00);
+  const [rechargeAmt, setRechargeAmt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [txHistory, setTxHistory] = useState([
+    { id: "TXN100821", date: "01 Aug 2026, 10:15 AM", plaza: "Kherki Daula Toll Plaza (NH88)", amt: 80.00, status: "Success", vehicle: "HR26DJ5432" },
+    { id: "TXN100742", date: "28 Jul 2026, 08:30 AM", plaza: "Yamuna Expressway Plaza", amt: 165.00, status: "Success", vehicle: "HR26DJ5432" },
+    { id: "TXN100619", date: "15 Jul 2026, 04:45 PM", plaza: "Mumbai-Pune Expressway Toll", amt: 320.00, status: "Success", vehicle: "MH12AB1234" },
+    { id: "TXN100588", date: "09 Jul 2026, 11:20 AM", plaza: "Gurgaon-Delhi Expressway", amt: 40.00, status: "Success", vehicle: "HR26DJ5432" }
+  ]);
+  const [message, setMessage] = useState<string | null>(null);
+
+  function handleRecharge(presetAmt?: number) {
+    const amt = presetAmt ?? parseFloat(rechargeAmt);
+    if (!amt || isNaN(amt) || amt <= 0) return;
+    setIsLoading(true);
+    setTimeout(() => {
+      setBalance(prev => prev + amt);
+      setTxHistory(prev => [
+        {
+          id: `TXN${Math.floor(100000 + Math.random() * 900000)}`,
+          date: new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }),
+          plaza: "FASTag Wallet Recharge",
+          amt: amt,
+          status: "Recharge",
+          vehicle: "Wallet Load"
+        },
+        ...prev
+      ]);
+      setRechargeAmt("");
+      setIsLoading(false);
+      setMessage(`Wallet recharged with ₹${amt.toFixed(2)} successfully!`);
+      setTimeout(() => setMessage(null), 4000);
+    }, 1200);
+  }
+
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      {/* Top Banner & Wallet Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 bg-gradient-to-br from-indigo-900 to-slate-905 text-white rounded-3xl p-6 relative overflow-hidden shadow-xl border border-indigo-950 flex flex-col justify-between min-h-[220px]">
+          <div className="absolute top-0 right-0 -mr-6 -mt-6 w-36 h-36 bg-primary/20 rounded-full blur-3xl" />
+          <div className="flex items-center justify-between z-10">
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-lg tracking-wider bg-white/10 px-3 py-1 rounded-xl text-white/90">FASTag</span>
+              <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950">Active</span>
+            </div>
+            <CreditCard className="w-8 h-8 text-white/40" />
+          </div>
+          <div className="my-4 z-10">
+            <span className="text-xs text-white/60 font-semibold block mb-1">Total Wallet Balance</span>
+            <span className="text-3xl font-black">₹{balance.toFixed(2)}</span>
+          </div>
+          <div className="z-10 flex items-center justify-between text-xs text-white/50 font-mono">
+            <span>ID: FT-8829104-VS</span>
+            <span>HDFC Bank Linked</span>
+          </div>
+        </div>
+
+        {/* Quick Recharge Form */}
+        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between shadow-2xs">
+          <div>
+            <h3 className="font-extrabold text-base text-slate-950 flex items-center gap-2">
+              <Banknote className="w-5 h-5 text-primary" /> Recharge FASTag Wallet
+            </h3>
+            <p className="text-slate-500 text-xs mt-1">Recharge instantly using UPI, NetBanking or Credit Cards.</p>
+          </div>
+
+          {message && (
+            <div className="bg-emerald-50 border border-emerald-250 text-emerald-900 rounded-xl p-3 text-xs font-bold my-3 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              {message}
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-bold">₹</span>
+              <input
+                type="number"
+                value={rechargeAmt}
+                onChange={e => setRechargeAmt(e.target.value)}
+                placeholder="Enter amount"
+                className="w-full bg-slate-50 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-2xl pl-7 pr-3 py-2.5 text-sm font-extrabold outline-none transition-all"
+              />
+            </div>
+            <div className="flex gap-2">
+              {[100, 200, 500].map(amt => (
+                <button
+                  key={amt}
+                  onClick={() => handleRecharge(amt)}
+                  disabled={isLoading}
+                  className="bg-slate-100 hover:bg-slate-200 border border-slate-250 disabled:opacity-50 text-slate-800 text-xs font-extrabold px-3 py-2.5 rounded-xl transition-all cursor-pointer"
+                >
+                  +₹{amt}
+                </button>
+              ))}
+            </div>
+            <Button
+              onClick={() => handleRecharge()}
+              disabled={isLoading || !rechargeAmt}
+              className="bg-primary hover:bg-primary/90 rounded-2xl text-xs font-extrabold py-2.5 px-6 gap-2 shrink-0 cursor-pointer h-full text-white"
+            >
+              {isLoading ? "Processing..." : "Recharge Wallet"}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Linked Vehicles & Transaction Logs */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Linked Vehicles list */}
+        <div className="lg:col-span-1 bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
+          <h3 className="font-extrabold text-slate-950 text-base mb-4">Linked Vehicles</h3>
+          <div className="space-y-3.5">
+            {[
+              { num: "HR26DJ5432", model: "Maruti Suzuki Swift", status: "Active", ftg: "TAG_99210041" },
+              { num: "MH12AB1234", model: "Hyundai Creta", status: "Active", ftg: "TAG_77182049" }
+            ].map(v => (
+              <div key={v.num} className="bg-slate-50 border border-slate-150 rounded-2xl p-4 flex justify-between items-center transition-all hover:bg-slate-100/70">
+                <div>
+                  <span className="font-mono text-sm font-black text-slate-950 block">{v.num}</span>
+                  <span className="text-[10px] text-slate-500 font-bold block mt-0.5">{v.model}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-150 text-emerald-600 block mb-1">
+                    {v.status}
+                  </span>
+                  <span className="text-[9px] text-slate-400 font-mono block">{v.ftg}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Transaction History log */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs flex flex-col justify-between">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-extrabold text-slate-950 text-base">Toll & Recharge Logs</h3>
+            <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-full">All Vehicles</span>
+          </div>
+
+          <div className="space-y-3 overflow-y-auto max-h-[350px] pr-1">
+            {txHistory.map((t) => {
+              const isRecharge = t.status === "Recharge";
+              return (
+                <div key={t.id} className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-150 bg-slate-50 hover:bg-slate-100/50 transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${
+                      isRecharge
+                        ? "bg-emerald-50 border-emerald-150 text-emerald-600"
+                        : "bg-indigo-50 border-indigo-150 text-indigo-600"
+                    }`}>
+                      {isRecharge ? <Plus className="w-4.5 h-4.5" /> : <Milestone className="w-4.5 h-4.5" />}
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-950 block">{t.plaza}</span>
+                      <span className="text-[10px] text-slate-500 font-semibold block mt-0.5">
+                        {t.date} • <span className="font-mono text-[9px]">{t.vehicle}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-xs font-black block ${isRecharge ? "text-emerald-600" : "text-slate-900"}`}>
+                      {isRecharge ? "+" : "-"}₹{t.amt.toFixed(2)}
+                    </span>
+                    <span className="text-[9px] text-slate-400 font-mono block mt-0.5">{t.id}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---- Dash CAM ---- */
+function DashcamTab() {
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+  const [speed, setSpeed] = useState(42);
+  const [snapshots, setSnapshots] = useState<string[]>([]);
+  const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
+  const [time, setTime] = useState(new Date());
+
+  // Tick time and mock speed dynamically
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    const speedTimer = setInterval(() => {
+      if (isPlaying) {
+        setSpeed(prev => {
+          const delta = Math.floor(Math.random() * 5) - 2; // change speed by -2 to +2
+          const newSpeed = prev + delta;
+          return Math.max(35, Math.min(65, newSpeed));
+        });
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(speedTimer);
+    };
+  }, [isPlaying]);
+
+  function triggerFeedback(msg: string) {
+    setFeedbackMsg(msg);
+    setTimeout(() => setFeedbackMsg(null), 3000);
+  }
+
+  function handleSnapshot() {
+    if (!isPlaying) return;
+    const now = new Date();
+    const formatted = `SNAP_${now.getHours()}${now.getMinutes()}${now.getSeconds()}_vs.jpg`;
+    setSnapshots(prev => [formatted, ...prev].slice(0, 3));
+    triggerFeedback("Snapshot taken successfully! Saved to gallery.");
+  }
+
+  function handleRecordClip() {
+    if (!isPlaying) return;
+    triggerFeedback("Event Clip Locked! Saving 1 min segment to SD Card...");
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
+      {/* Live Video Feed Container */}
+      <div className="lg:col-span-2 space-y-4">
+        <div className="bg-slate-950 rounded-3xl overflow-hidden border border-slate-900 shadow-2xl relative">
+          
+          {/* Main Feed Simulator Screen (16:9) */}
+          <div className="aspect-video w-full relative flex items-center justify-center overflow-hidden">
+            {isPlaying ? (
+              <>
+                {/* stylized road/recording simulation */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950/70" />
+                
+                {/* Perspective Road Simulation in CSS */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-full bg-slate-800 opacity-20 transform origin-bottom perspective-100 skew-x-12 blur-[1px]" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-full bg-slate-800 opacity-20 transform origin-bottom perspective-100 -skew-x-12 blur-[1px]" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 border-l-2 border-dashed border-white/30 h-[80%] opacity-40 animate-pulse" />
+                
+                {/* Scanning lines */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] pointer-events-none" />
+
+                {/* Simulated Lens Dirt or Grid lines */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-white/5 w-[80%] h-[80%] rounded-2xl pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-dashed border-white/5 w-[50%] h-[50%] rounded-full pointer-events-none" />
+                
+                {/* HUD Overlay */}
+                <div className="absolute top-4 left-4 flex items-center gap-2 font-bold drop-shadow-md">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping flex-shrink-0" />
+                  <span className="text-red-500 font-extrabold text-xs tracking-widest uppercase">REC</span>
+                  <span className="text-white/80 font-mono text-xs">CH1 FRONT</span>
+                </div>
+
+                <div className="absolute top-4 right-4 text-right font-mono text-xs text-white/90 drop-shadow-md">
+                  <div>{time.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })}</div>
+                  <div>{time.toLocaleTimeString()}</div>
+                </div>
+
+                <div className="absolute bottom-4 left-4 font-mono text-xs text-white/90 drop-shadow-md space-y-0.5">
+                  <div>GPS: 28.4595° N, 77.0266° E</div>
+                  <div>ALT: 220 m</div>
+                </div>
+
+                <div className="absolute bottom-4 right-4 flex items-end gap-3 drop-shadow-md">
+                  <div className="text-right">
+                    <span className="text-[9px] uppercase font-black text-white/60 block leading-none">Vehicle Speed</span>
+                    <span className="text-2xl font-black font-mono text-emerald-400">{speed} <span className="text-xs">km/h</span></span>
+                  </div>
+                </div>
+
+                {/* Microphone Audio Indicator */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-full text-white/70 text-[10px] font-bold flex items-center gap-1.5 border border-white/5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${isAudioMuted ? "bg-red-500" : "bg-emerald-500 animate-pulse"}`} />
+                  <span>{isAudioMuted ? "MIC OFF" : "MIC ON"}</span>
+                </div>
+              </>
+            ) : (
+              <div className="text-center space-y-2 z-10 text-slate-500">
+                <Tv className="w-12 h-12 mx-auto opacity-40 animate-pulse" />
+                <p className="text-xs font-bold uppercase tracking-widest">FEED OFFLINE</p>
+                <p className="text-[10px] opacity-75">Connect dashcam to power on local feed</p>
+              </div>
+            )}
+
+            {/* Snapshot/Record flash overlay */}
+            <AnimatePresence>
+              {feedbackMsg && feedbackMsg.includes("Snapshot") && (
+                <motion.div initial={{ opacity: 1 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 bg-white z-20 pointer-events-none" />
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Video Control Bar */}
+          <div className="bg-slate-900 px-6 py-4 flex items-center justify-between gap-4 border-t border-slate-800">
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="w-9 h-9 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              >
+                {isPlaying ? <Pause className="w-4.5 h-4.5" /> : <Play className="w-4.5 h-4.5" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsAudioMuted(!isAudioMuted)}
+                className={`w-9 h-9 rounded-xl hover:bg-slate-800 cursor-pointer ${isAudioMuted ? "text-red-500" : "text-slate-400 hover:text-white"}`}
+              >
+                <WifiOff className="w-4.5 h-4.5" />
+              </Button>
+            </div>
+
+            {feedbackMsg && (
+              <div className="text-[10px] font-extrabold text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                {feedbackMsg}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSnapshot}
+                disabled={!isPlaying}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-extrabold h-9 gap-1.5 px-3.5 cursor-pointer text-white"
+              >
+                <Camera className="w-3.5 h-3.5" /> Capture
+              </Button>
+              <Button
+                onClick={handleRecordClip}
+                disabled={!isPlaying}
+                className="bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-extrabold h-9 gap-1.5 px-3.5 cursor-pointer"
+              >
+                <AlertTriangle className="w-3.5 h-3.5" /> Record Incident
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Snapshots Gallery */}
+        {snapshots.length > 0 && (
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs">
+            <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider mb-3">Recent Local Captures</h4>
+            <div className="grid grid-cols-3 gap-3">
+              {snapshots.map((snap, i) => (
+                <div key={i} className="aspect-video bg-slate-900 border border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center text-white/50 text-[9px] font-mono">
+                  <div className="absolute inset-0 bg-indigo-950/20" />
+                  <div className="absolute bottom-1 left-1.5 text-[8px] bg-black/55 px-1 rounded-sm text-white/90">SNAP {i+1}</div>
+                  <Camera className="w-4 h-4 opacity-40" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* SD Card Storage & Historical Logs list */}
+      <div className="lg:col-span-1 space-y-6">
+        
+        {/* SD Card Status */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
+          <h3 className="font-extrabold text-slate-950 text-base mb-3.5 flex items-center justify-between">
+            <span>SD Card Storage</span>
+            <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-150 px-2 py-0.5 rounded-full font-black uppercase">Healthy</span>
+          </h3>
+          <div className="space-y-3">
+            <div className="flex justify-between text-xs font-bold text-slate-700">
+              <span>Used Storage</span>
+              <span>45.2 GB / 128 GB (35%)</span>
+            </div>
+            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+              <div className="bg-primary h-full rounded-full animate-pulse" style={{ width: "35%" }} />
+            </div>
+            <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+              <span>Auto-loop: ON</span>
+              <span>Class 10 High Speed</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Saved Videos list */}
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-extrabold text-slate-950 text-base">Recorded Clips</h3>
+            <span className="text-[9px] uppercase font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-sm">Locked</span>
+          </div>
+
+          <div className="space-y-3 overflow-y-auto max-h-[350px] pr-1">
+            {[
+              { id: "CL-98129", type: "G-Sensor Alert (Sudden Brake)", date: "Yesterday, 04:12 PM", time: "1m 30s", size: "24 MB", locked: true },
+              { id: "CL-98018", type: "Manual Event Record", date: "30 Jul 2026, 09:40 AM", time: "2m 00s", size: "32 MB", locked: true },
+              { id: "CL-97422", type: "Parking Impact Lock", date: "24 Jul 2026, 02:15 AM", time: "45s", size: "12 MB", locked: true },
+              { id: "CL-97210", type: "Road Trip Scenic Clip", date: "18 Jul 2026, 03:00 PM", time: "10m 00s", size: "160 MB", locked: false }
+            ].map(c => (
+              <div key={c.id} className="p-3 bg-slate-50 border border-slate-150 rounded-2xl flex justify-between items-center hover:bg-slate-100/60 transition-all">
+                <div className="min-w-0">
+                  <p className="text-xs font-black text-slate-950 truncate flex items-center gap-1.5">
+                    {c.locked && <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="Locked" />}
+                    {c.type}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-semibold mt-0.5">{c.date} • {c.size}</p>
+                </div>
+                <div className="flex gap-1.5 shrink-0 ml-2">
+                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg hover:bg-slate-200 cursor-pointer" title="Download clip">
+                    <Download className="w-3.5 h-3.5 text-slate-600" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---- Main Dashboard ---- */
+
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, logout } = useAuth();
@@ -1679,8 +2104,10 @@ export default function Dashboard() {
         setApiVehicles={setApiVehicles}
       />
     ),
+    fasttag: <FasttagTab />,
     mall: <MallTab />,
     mechanic: <MechanicTab />,
+    dashcam: <DashcamTab />,
     gps: <GpsTab />
   };
 
