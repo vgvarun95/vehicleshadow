@@ -2024,22 +2024,38 @@ function FasttagTab({
 
 /* ---- Dash CAM ---- */
 function DashcamTab() {
+  const [selectedVehIndex, setSelectedVehIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
-  const [speed, setSpeed] = useState(42);
   const [snapshots, setSnapshots] = useState<string[]>([]);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [time, setTime] = useState(new Date());
+
+  const DASHCAM_VEHICLES = [
+    { num: "HR26DJ5432", model: "Maruti Suzuki Swift", location: "Kherki Daula Toll Plaza", initSpeed: 42, gps: "28.4595° N, 77.0266° E", status: "Online" },
+    { num: "MH12AB1234", model: "Hyundai Creta", location: "Mumbai-Pune Expressway", initSpeed: 65, gps: "18.7512° N, 73.4215° E", status: "Online" },
+    { num: "DL3CAQ9910", model: "Tata Nexon EV", location: "Connaught Place, Delhi", initSpeed: 28, gps: "28.6304° N, 77.2177° E", status: "Online" },
+    { num: "KA03MM8821", model: "Mahindra XUV700", location: "Electronic City, Bangalore", initSpeed: 0, gps: "12.8452° N, 77.6722° E", status: "Offline" },
+    { num: "GJ01ZZ5543", model: "Kia Seltos", location: "SG Highway, Ahmedabad", initSpeed: 55, gps: "23.0225° N, 72.5714° E", status: "Online" }
+  ];
+
+  const activeVeh = DASHCAM_VEHICLES[selectedVehIndex];
+  const [speed, setSpeed] = useState(activeVeh.initSpeed);
+
+  // Sync speed state when vehicle changes
+  useEffect(() => {
+    setSpeed(activeVeh.initSpeed);
+  }, [selectedVehIndex]);
 
   // Tick time and mock speed dynamically
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     const speedTimer = setInterval(() => {
-      if (isPlaying) {
+      if (isPlaying && activeVeh.status === "Online" && activeVeh.initSpeed > 0) {
         setSpeed(prev => {
-          const delta = Math.floor(Math.random() * 5) - 2; // change speed by -2 to +2
+          const delta = Math.floor(Math.random() * 5) - 2;
           const newSpeed = prev + delta;
-          return Math.max(35, Math.min(65, newSpeed));
+          return Math.max(20, Math.min(100, newSpeed));
         });
       }
     }, 3000);
@@ -2048,7 +2064,7 @@ function DashcamTab() {
       clearInterval(timer);
       clearInterval(speedTimer);
     };
-  }, [isPlaying]);
+  }, [isPlaying, selectedVehIndex]);
 
   function triggerFeedback(msg: string) {
     setFeedbackMsg(msg);
@@ -2056,207 +2072,264 @@ function DashcamTab() {
   }
 
   function handleSnapshot() {
-    if (!isPlaying) return;
+    if (!isPlaying || activeVeh.status === "Offline") return;
     const now = new Date();
     const formatted = `SNAP_${now.getHours()}${now.getMinutes()}${now.getSeconds()}_vs.jpg`;
     setSnapshots(prev => [formatted, ...prev].slice(0, 3));
-    triggerFeedback("Snapshot taken successfully! Saved to gallery.");
+    triggerFeedback(`Snapshot taken successfully for ${activeVeh.num}! Saved to gallery.`);
   }
 
+  // Record clip handler
   function handleRecordClip() {
-    if (!isPlaying) return;
-    triggerFeedback("Event Clip Locked! Saving 1 min segment to SD Card...");
+    if (!isPlaying || activeVeh.status === "Offline") return;
+    triggerFeedback(`Event Clip Locked for ${activeVeh.num}! Saving 1 min segment to SD Card...`);
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
-      {/* Live Video Feed Container */}
-      <div className="lg:col-span-2 space-y-4">
-        <div className="bg-slate-950 rounded-3xl overflow-hidden border border-slate-900 shadow-2xl relative">
-          
-          {/* Main Feed Simulator Screen (16:9) */}
-          <div className="aspect-video w-full relative flex items-center justify-center overflow-hidden">
-            {isPlaying ? (
-              <>
-                {/* stylized road/recording simulation */}
-                <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950/70" />
-                
-                {/* Perspective Road Simulation in CSS */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-full bg-slate-800 opacity-20 transform origin-bottom perspective-100 skew-x-12 blur-[1px]" />
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-full bg-slate-800 opacity-20 transform origin-bottom perspective-100 -skew-x-12 blur-[1px]" />
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 border-l-2 border-dashed border-white/30 h-[80%] opacity-40 animate-pulse" />
-                
-                {/* Scanning lines */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] pointer-events-none" />
-
-                {/* Simulated Lens Dirt or Grid lines */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-white/5 w-[80%] h-[80%] rounded-2xl pointer-events-none" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-dashed border-white/5 w-[50%] h-[50%] rounded-full pointer-events-none" />
-                
-                {/* HUD Overlay */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 font-bold drop-shadow-md">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping flex-shrink-0" />
-                  <span className="text-red-500 font-extrabold text-xs tracking-widest uppercase">REC</span>
-                  <span className="text-white/80 font-mono text-xs">CH1 FRONT</span>
-                </div>
-
-                <div className="absolute top-4 right-4 text-right font-mono text-xs text-white/90 drop-shadow-md">
-                  <div>{time.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })}</div>
-                  <div>{time.toLocaleTimeString()}</div>
-                </div>
-
-                <div className="absolute bottom-4 left-4 font-mono text-xs text-white/90 drop-shadow-md space-y-0.5">
-                  <div>GPS: 28.4595° N, 77.0266° E</div>
-                  <div>ALT: 220 m</div>
-                </div>
-
-                <div className="absolute bottom-4 right-4 flex items-end gap-3 drop-shadow-md">
-                  <div className="text-right">
-                    <span className="text-[9px] uppercase font-black text-white/60 block leading-none">Vehicle Speed</span>
-                    <span className="text-2xl font-black font-mono text-emerald-400">{speed} <span className="text-xs">km/h</span></span>
+    <div className="flex flex-col lg:flex-row gap-6 animate-fadeIn">
+      {/* Left Column: Vehicle List */}
+      <div className="lg:w-[320px] w-full flex-shrink-0 space-y-4">
+        <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs">
+          <h3 className="font-extrabold text-slate-950 text-base mb-4">Dashcam Devices</h3>
+          <div className="space-y-2.5">
+            {DASHCAM_VEHICLES.map((v, idx) => {
+              const isSelected = selectedVehIndex === idx;
+              return (
+                <button
+                  key={v.num}
+                  onClick={() => setSelectedVehIndex(idx)}
+                  className={`w-full text-left p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative overflow-hidden group ${
+                    isSelected
+                      ? "bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/10 scale-[1.02]"
+                      : "bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100 hover:border-slate-350"
+                  }`}
+                >
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-purple-600/10 pointer-events-none opacity-40" />
+                  )}
+                  
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    isSelected ? "bg-white/10 text-white" : "bg-primary/10 text-primary"
+                  }`}>
+                    <Car className="w-5 h-5" />
                   </div>
-                </div>
-
-                {/* Microphone Audio Indicator */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-full text-white/70 text-[10px] font-bold flex items-center gap-1.5 border border-white/5">
-                  <span className={`w-1.5 h-1.5 rounded-full ${isAudioMuted ? "bg-red-500" : "bg-emerald-500 animate-pulse"}`} />
-                  <span>{isAudioMuted ? "MIC OFF" : "MIC ON"}</span>
-                </div>
-              </>
-            ) : (
-              <div className="text-center space-y-2 z-10 text-slate-500">
-                <Tv className="w-12 h-12 mx-auto opacity-40 animate-pulse" />
-                <p className="text-xs font-bold uppercase tracking-widest">FEED OFFLINE</p>
-                <p className="text-[10px] opacity-75">Connect dashcam to power on local feed</p>
-              </div>
-            )}
-
-            {/* Snapshot/Record flash overlay */}
-            <AnimatePresence>
-              {feedbackMsg && feedbackMsg.includes("Snapshot") && (
-                <motion.div initial={{ opacity: 1 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 bg-white z-20 pointer-events-none" />
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Video Control Bar */}
-          <div className="bg-slate-900 px-6 py-4 flex items-center justify-between gap-4 border-t border-slate-800">
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="w-9 h-9 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
-              >
-                {isPlaying ? <Pause className="w-4.5 h-4.5" /> : <Play className="w-4.5 h-4.5" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsAudioMuted(!isAudioMuted)}
-                className={`w-9 h-9 rounded-xl hover:bg-slate-800 cursor-pointer ${isAudioMuted ? "text-red-500" : "text-slate-400 hover:text-white"}`}
-              >
-                <WifiOff className="w-4.5 h-4.5" />
-              </Button>
-            </div>
-
-            {feedbackMsg && (
-              <div className="text-[10px] font-extrabold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                {feedbackMsg}
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <Button
-                onClick={handleSnapshot}
-                disabled={!isPlaying}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-extrabold h-9 gap-1.5 px-3.5 cursor-pointer text-white"
-              >
-                <Camera className="w-3.5 h-3.5" /> Capture
-              </Button>
-              <Button
-                onClick={handleRecordClip}
-                disabled={!isPlaying}
-                className="bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-extrabold h-9 gap-1.5 px-3.5 cursor-pointer"
-              >
-                <AlertTriangle className="w-3.5 h-3.5" /> Record Incident
-              </Button>
-            </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black tracking-wide leading-none">{v.num}</p>
+                    <p className={`text-[10px] font-semibold mt-1 truncate ${
+                      isSelected ? "text-slate-300" : "text-slate-500"
+                    }`}>{v.model}</p>
+                    <p className={`text-[9px] font-bold mt-1 flex items-center gap-1.5 ${
+                      isSelected ? "text-slate-400" : "text-slate-500"
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        v.status === "Online" ? "bg-green-500 animate-pulse" : "bg-red-500"
+                      }`} />
+                      {v.status === "Online" ? "Connected" : "Disconnected"}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
+      </div>
 
-        {/* Live Snapshots Gallery */}
-        {snapshots.length > 0 && (
-          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs">
-            <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider mb-3">Recent Local Captures</h4>
-            <div className="grid grid-cols-3 gap-3">
-              {snapshots.map((snap, i) => (
-                <div key={i} className="aspect-video bg-slate-900 border border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center text-white/50 text-[9px] font-mono">
-                  <div className="absolute inset-0 bg-indigo-950/20" />
-                  <div className="absolute bottom-1 left-1.5 text-[8px] bg-black/55 px-1 rounded-sm text-white/90">SNAP {i+1}</div>
-                  <Camera className="w-4 h-4 opacity-40" />
+      {/* Right Column: Camera Player & Storage Info */}
+      <div className="flex-1 space-y-6">
+        {/* Live Video Feed Container */}
+        <div className="space-y-4">
+          <div className="bg-slate-950 rounded-3xl overflow-hidden border border-slate-900 shadow-2xl relative">
+            {/* Main Feed Simulator Screen (16:9) */}
+            <div className="aspect-video w-full relative flex items-center justify-center overflow-hidden">
+              {isPlaying && activeVeh.status === "Online" ? (
+                <>
+                  {/* stylized road/recording simulation */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950/70" />
+                  
+                  {/* Perspective Road Simulation in CSS */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-full bg-slate-800 opacity-20 transform origin-bottom perspective-100 skew-x-12 blur-[1px]" />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-full bg-slate-800 opacity-20 transform origin-bottom perspective-100 -skew-x-12 blur-[1px]" />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 border-l-2 border-dashed border-white/30 h-[80%] opacity-40 animate-pulse" />
+                  
+                  {/* Scanning lines */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.4)_100%)] pointer-events-none" />
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] pointer-events-none" />
+
+                  {/* Simulated Lens Dirt or Grid lines */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-white/5 w-[80%] h-[80%] rounded-2xl pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-dashed border-white/5 w-[50%] h-[50%] rounded-full pointer-events-none" />
+                  
+                  {/* HUD Overlay */}
+                  <div className="absolute top-4 left-4 flex items-center gap-2 font-bold drop-shadow-md">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping flex-shrink-0" />
+                    <span className="text-red-500 font-extrabold text-xs tracking-widest uppercase">REC</span>
+                    <span className="text-white/80 font-mono text-[10px]">{activeVeh.num} • FRONT</span>
+                  </div>
+
+                  <div className="absolute top-4 right-4 text-right font-mono text-xs text-white/90 drop-shadow-md">
+                    <div>{time.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })}</div>
+                    <div>{time.toLocaleTimeString()}</div>
+                  </div>
+
+                  <div className="absolute bottom-4 left-4 font-mono text-xs text-white/90 drop-shadow-md space-y-0.5">
+                    <div>GPS: {activeVeh.gps}</div>
+                    <div>ALT: 220 m</div>
+                  </div>
+
+                  <div className="absolute bottom-4 right-4 flex items-end gap-3 drop-shadow-md">
+                    <div className="text-right">
+                      <span className="text-[9px] uppercase font-black text-white/60 block leading-none">Vehicle Speed</span>
+                      <span className="text-2xl font-black font-mono text-emerald-400">{speed} <span className="text-xs">km/h</span></span>
+                    </div>
+                  </div>
+
+                  {/* Microphone Audio Indicator */}
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-xs px-2.5 py-1 rounded-full text-white/70 text-[10px] font-bold flex items-center gap-1.5 border border-white/5">
+                    <span className={`w-1.5 h-1.5 rounded-full ${isAudioMuted ? "bg-red-500" : "bg-emerald-500 animate-pulse"}`} />
+                    <span>{isAudioMuted ? "MIC OFF" : "MIC ON"}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center space-y-2 z-10 text-slate-500">
+                  <Tv className="w-12 h-12 mx-auto opacity-40 animate-pulse" />
+                  <p className="text-xs font-bold uppercase tracking-widest">
+                    {activeVeh.status === "Offline" ? "DEVICE OFFLINE" : "FEED PAUSED"}
+                  </p>
+                  <p className="text-[10px] opacity-75">
+                    {activeVeh.status === "Offline"
+                      ? `Dashcam for ${activeVeh.num} is not responding.`
+                      : `Press Play button to resume live feed.`}
+                  </p>
+                </div>
+              )}
+
+              {/* Snapshot/Record flash overlay */}
+              <AnimatePresence>
+                {feedbackMsg && feedbackMsg.includes("Snapshot") && (
+                  <motion.div initial={{ opacity: 1 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 bg-white z-20 pointer-events-none" />
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Video Control Bar */}
+            <div className="bg-slate-900 px-6 py-4 flex items-center justify-between gap-4 border-t border-slate-800">
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  disabled={activeVeh.status === "Offline"}
+                  className="w-9 h-9 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  {isPlaying && activeVeh.status === "Online" ? <Pause className="w-4.5 h-4.5" /> : <Play className="w-4.5 h-4.5" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsAudioMuted(!isAudioMuted)}
+                  disabled={activeVeh.status === "Offline"}
+                  className={`w-9 h-9 rounded-xl hover:bg-slate-800 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${isAudioMuted ? "text-red-500" : "text-slate-400 hover:text-white"}`}
+                >
+                  <WifiOff className="w-4.5 h-4.5" />
+                </Button>
+              </div>
+
+              {feedbackMsg && (
+                <div className="text-[10px] font-extrabold text-emerald-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  {feedbackMsg}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSnapshot}
+                  disabled={!isPlaying || activeVeh.status === "Offline"}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-extrabold h-9 gap-1.5 px-3.5 cursor-pointer text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Camera className="w-3.5 h-3.5" /> Capture
+                </Button>
+                <Button
+                  onClick={handleRecordClip}
+                  disabled={!isPlaying || activeVeh.status === "Offline"}
+                  className="bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-extrabold h-9 gap-1.5 px-3.5 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5" /> Record Incident
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Snapshots Gallery */}
+          {snapshots.length > 0 && (
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-2xs">
+              <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider mb-3">Recent Local Captures</h4>
+              <div className="grid grid-cols-3 gap-3">
+                {snapshots.map((snap, i) => (
+                  <div key={i} className="aspect-video bg-slate-900 border border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center text-white/50 text-[9px] font-mono">
+                    <div className="absolute inset-0 bg-indigo-950/20" />
+                    <div className="absolute bottom-1 left-1.5 text-[8px] bg-black/55 px-1 rounded-sm text-white/90">SNAP {i+1}</div>
+                    <Camera className="w-4 h-4 opacity-40" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* SD Card Status & Historical Logs (sub-grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* SD Card Status */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs md:col-span-1">
+            <h3 className="font-extrabold text-slate-950 text-base mb-3.5 flex items-center justify-between">
+              <span>SD Card</span>
+              <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-150 px-2 py-0.5 rounded-full font-black uppercase">Healthy</span>
+            </h3>
+            <div className="space-y-3">
+              <div className="flex justify-between text-xs font-bold text-slate-700">
+                <span>Used</span>
+                <span>45 GB / 128 GB</span>
+              </div>
+              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                <div className="bg-primary h-full rounded-full animate-pulse" style={{ width: "35%" }} />
+              </div>
+              <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+                <span>Loop: ON</span>
+                <span>Class 10</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Saved Videos list */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs md:col-span-2">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-extrabold text-slate-950 text-base">Recorded Clips</h3>
+              <span className="text-[9px] uppercase font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-sm">Locked</span>
+            </div>
+
+            <div className="space-y-3 overflow-y-auto max-h-[180px] pr-1">
+              {[
+                { id: "CL-98129", type: "G-Sensor Alert (Sudden Brake)", date: "Yesterday, 04:12 PM", size: "24 MB" },
+                { id: "CL-98018", type: "Manual Event Record", date: "30 Jul 2026, 09:40 AM", size: "32 MB" },
+                { id: "CL-97422", type: "Parking Impact Lock", date: "24 Jul 2026, 02:15 AM", size: "12 MB" }
+              ].map(c => (
+                <div key={c.id} className="p-3 bg-slate-50 border border-slate-150 rounded-2xl flex justify-between items-center hover:bg-slate-100/60 transition-all">
+                  <div className="min-w-0">
+                    <p className="text-xs font-black text-slate-950 truncate flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="Locked" />
+                      {c.type}
+                    </p>
+                    <p className="text-[10px] text-slate-500 font-semibold mt-0.5">{c.date} • {c.size}</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0 ml-2">
+                    <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg hover:bg-slate-200 cursor-pointer" title="Download clip">
+                      <Download className="w-3.5 h-3.5 text-slate-600" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* SD Card Storage & Historical Logs list */}
-      <div className="lg:col-span-1 space-y-6">
-        
-        {/* SD Card Status */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
-          <h3 className="font-extrabold text-slate-950 text-base mb-3.5 flex items-center justify-between">
-            <span>SD Card Storage</span>
-            <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-150 px-2 py-0.5 rounded-full font-black uppercase">Healthy</span>
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between text-xs font-bold text-slate-700">
-              <span>Used Storage</span>
-              <span>45.2 GB / 128 GB (35%)</span>
-            </div>
-            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-              <div className="bg-primary h-full rounded-full animate-pulse" style={{ width: "35%" }} />
-            </div>
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
-              <span>Auto-loop: ON</span>
-              <span>Class 10 High Speed</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Saved Videos list */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-extrabold text-slate-950 text-base">Recorded Clips</h3>
-            <span className="text-[9px] uppercase font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-sm">Locked</span>
-          </div>
-
-          <div className="space-y-3 overflow-y-auto max-h-[350px] pr-1">
-            {[
-              { id: "CL-98129", type: "G-Sensor Alert (Sudden Brake)", date: "Yesterday, 04:12 PM", time: "1m 30s", size: "24 MB", locked: true },
-              { id: "CL-98018", type: "Manual Event Record", date: "30 Jul 2026, 09:40 AM", time: "2m 00s", size: "32 MB", locked: true },
-              { id: "CL-97422", type: "Parking Impact Lock", date: "24 Jul 2026, 02:15 AM", time: "45s", size: "12 MB", locked: true },
-              { id: "CL-97210", type: "Road Trip Scenic Clip", date: "18 Jul 2026, 03:00 PM", time: "10m 00s", size: "160 MB", locked: false }
-            ].map(c => (
-              <div key={c.id} className="p-3 bg-slate-50 border border-slate-150 rounded-2xl flex justify-between items-center hover:bg-slate-100/60 transition-all">
-                <div className="min-w-0">
-                  <p className="text-xs font-black text-slate-950 truncate flex items-center gap-1.5">
-                    {c.locked && <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="Locked" />}
-                    {c.type}
-                  </p>
-                  <p className="text-[10px] text-slate-500 font-semibold mt-0.5">{c.date} • {c.size}</p>
-                </div>
-                <div className="flex gap-1.5 shrink-0 ml-2">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg hover:bg-slate-200 cursor-pointer" title="Download clip">
-                    <Download className="w-3.5 h-3.5 text-slate-600" />
-                  </Button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
