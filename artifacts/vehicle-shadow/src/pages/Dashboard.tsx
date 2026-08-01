@@ -2517,7 +2517,7 @@ export default function Dashboard() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Vehicle Shadow" className="h-10 object-contain cursor-pointer hover:opacity-85 transition-opacity" onClick={() => setLocation("/")} />
+            <img src="/logo.png" alt="Vehicle Shadow" className="h-10 object-contain cursor-pointer hover:opacity-85 transition-opacity" onClick={() => handleTabSelect("vehicle")} />
           </div>
 
           <nav className="hidden md:flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-2xl p-1">
