@@ -1531,7 +1531,10 @@ function GpsTab() {
 
 /* ---- Fasttag Management ---- */
 function FasttagTab() {
-  const [balance, setBalance] = useState(750.00);
+  const [balances, setBalances] = useState<Record<string, number>>({
+    "HR26DJ5432": 750.00,
+    "MH12AB1234": 200.00
+  });
   const [rechargeAmt, setRechargeAmt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState("All");
@@ -1539,6 +1542,8 @@ function FasttagTab() {
     { num: "HR26DJ5432", model: "Maruti Suzuki Swift", status: "Active", ftg: "TAG_99210041" },
     { num: "MH12AB1234", model: "Hyundai Creta", status: "Active", ftg: "TAG_77182049" }
   ]);
+  const [rechargeTarget, setRechargeTarget] = useState("HR26DJ5432");
+  
   const [txHistory, setTxHistory] = useState([
     { id: "TXN100821", date: "01 Aug 2026, 10:15 AM", plaza: "Kherki Daula Toll Plaza (NH48)", amt: 80.00, status: "Success", vehicle: "HR26DJ5432" },
     { id: "TXN100742", date: "28 Jul 2026, 08:30 AM", plaza: "Yamuna Expressway Plaza", amt: 165.00, status: "Success", vehicle: "HR26DJ5432" },
@@ -1550,12 +1555,34 @@ function FasttagTab() {
   ]);
   const [message, setMessage] = useState<string | null>(null);
 
+  // Sync recharge target automatically if a specific active vehicle is selected
+  useEffect(() => {
+    if (selectedVehicle !== "All") {
+      const selected = vehicles.find(v => v.num === selectedVehicle);
+      if (selected && selected.status === "Active") {
+        setRechargeTarget(selectedVehicle);
+      }
+    }
+  }, [selectedVehicle, vehicles]);
+
   function handleRecharge(presetAmt?: number) {
     const amt = presetAmt ?? parseFloat(rechargeAmt);
     if (!amt || isNaN(amt) || amt <= 0) return;
+    
+    const targetVeh = selectedVehicle === "All" ? rechargeTarget : selectedVehicle;
+    const targetModel = vehicles.find(v => v.num === targetVeh);
+    if (!targetVeh || (targetModel && targetModel.status !== "Active")) {
+      setMessage("Cannot recharge: target vehicle is pending activation.");
+      setTimeout(() => setMessage(null), 3500);
+      return;
+    }
+
     setIsLoading(true);
     setTimeout(() => {
-      setBalance(prev => prev + amt);
+      setBalances(prev => ({
+        ...prev,
+        [targetVeh]: (prev[targetVeh] ?? 0.00) + amt
+      }));
       setTxHistory(prev => [
         {
           id: `TXN${Math.floor(100000 + Math.random() * 900000)}`,
@@ -1563,18 +1590,18 @@ function FasttagTab() {
           plaza: "FASTag Wallet Recharge",
           amt: amt,
           status: "Recharge",
-          vehicle: "Wallet Load"
+          vehicle: targetVeh
         },
         ...prev
       ]);
       setRechargeAmt("");
       setIsLoading(false);
-      setMessage(`Wallet recharged with ₹${amt.toFixed(2)} successfully!`);
+      setMessage(`Wallet for ${targetVeh} recharged with ₹${amt.toFixed(2)} successfully!`);
       setTimeout(() => setMessage(null), 4000);
     }, 1200);
   }
 
-  function handleNewApplication(vehNum: string) {
+  function handleApplyNew(vehNum: string) {
     setVehicles(prev => [
       ...prev,
       {
@@ -1584,6 +1611,27 @@ function FasttagTab() {
         ftg: `TAG_${Math.floor(10000000 + Math.random() * 90000000)}`
       }
     ]);
+    setBalances(prev => ({
+      ...prev,
+      [vehNum]: 0.00
+    }));
+  }
+
+  function handleAddExisting(vehNum: string) {
+    setVehicles(prev => [
+      ...prev,
+      {
+        num: vehNum,
+        model: "Added Vehicle",
+        status: "Active",
+        ftg: `TAG_${Math.floor(10000000 + Math.random() * 90000000)}`
+      }
+    ]);
+    setBalances(prev => ({
+      ...prev,
+      [vehNum]: 250.00
+    }));
+    setRechargeTarget(vehNum);
   }
 
   // Filtered transactions based on selected vehicle
@@ -1592,19 +1640,24 @@ function FasttagTab() {
     return t.vehicle === selectedVehicle;
   });
 
+  // Display balance logic
+  const displayBalance = selectedVehicle === "All"
+    ? Object.values(balances).reduce((sum, b) => sum + b, 0)
+    : (balances[selectedVehicle] ?? 0.00);
+
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Sidebar: Apply and Linked Vehicles (col-span-4) */}
+        {/* Left Sidebar: Apply, Add and Linked Vehicles (col-span-4) */}
         <div className="lg:col-span-4 space-y-6">
           
           {/* Apply for New FASTag Card */}
           <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
-            <h3 className="font-extrabold text-slate-950 text-sm uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <h3 className="font-extrabold text-slate-950 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Plus className="w-4 h-4 text-primary" /> Apply New FASTag
             </h3>
-            <p className="text-slate-500 text-[11px] mb-4">Get a new high-speed RFID tag delivered to your doorstep.</p>
+            <p className="text-slate-500 text-[10px] mb-3">Get a new high-speed RFID tag delivered to your doorstep.</p>
             
             <form
               onSubmit={(e) => {
@@ -1613,7 +1666,7 @@ function FasttagTab() {
                 const input = form.elements.namedItem("vehNum") as HTMLInputElement;
                 const cleanNum = input.value.trim().toUpperCase();
                 if (!cleanNum) return;
-                handleNewApplication(cleanNum);
+                handleApplyNew(cleanNum);
                 input.value = "";
                 setMessage("FASTag application submitted successfully!");
                 setTimeout(() => setMessage(null), 4000);
@@ -1632,9 +1685,49 @@ function FasttagTab() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary/95 text-white rounded-xl text-xs font-extrabold py-2 px-4 cursor-pointer"
+                className="w-full bg-primary hover:bg-primary/95 text-white rounded-xl text-[11px] font-extrabold py-2 px-4 cursor-pointer"
               >
                 Apply Now
+              </Button>
+            </form>
+          </div>
+
+          {/* Add Existing FASTag Card */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs">
+            <h3 className="font-extrabold text-slate-950 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Plus className="w-4 h-4 text-emerald-600" /> Add Existing FASTag
+            </h3>
+            <p className="text-slate-500 text-[10px] mb-3">Link your already active FASTag to your vehicle shadow account.</p>
+            
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const input = form.elements.namedItem("vehNum") as HTMLInputElement;
+                const cleanNum = input.value.trim().toUpperCase();
+                if (!cleanNum) return;
+                handleAddExisting(cleanNum);
+                input.value = "";
+                setMessage("FASTag linked successfully!");
+                setTimeout(() => setMessage(null), 4000);
+              }}
+              className="space-y-3"
+            >
+              <div>
+                <label className="text-[10px] text-slate-500 font-semibold mb-1 block">Vehicle Number</label>
+                <input
+                  name="vehNum"
+                  type="text"
+                  placeholder="e.g. MH12CD5678"
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 focus:bg-white rounded-xl px-3 py-2 text-xs font-bold outline-none transition-all"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-extrabold py-2 px-4 cursor-pointer"
+              >
+                Add Tag
               </Button>
             </form>
           </div>
@@ -1707,11 +1800,16 @@ function FasttagTab() {
                 <CreditCard className="w-8 h-8 text-white/40" />
               </div>
               <div className="my-3 z-10">
-                <span className="text-[10px] text-white/60 font-semibold block mb-1">Total Wallet Balance</span>
-                <span className="text-3xl font-black">₹{balance.toFixed(2)}</span>
+                <span className="text-[10px] text-white/60 font-semibold block mb-1">
+                  {selectedVehicle === "All" ? "Total Balance (All Vehicles)" : `Wallet Balance (${selectedVehicle})`}
+                </span>
+                <span className="text-3xl font-black">₹{displayBalance.toFixed(2)}</span>
               </div>
-              <div className="z-10 flex items-center justify-between text-[10px] text-white/50 font-mono">
-                <span>ID: FT-8829104-VS</span>
+              <div className="z-10 flex items-center justify-between text-[10px] text-white/70 font-mono bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {selectedVehicle === "All" ? "All Linked Vehicles" : `Vehicle: ${selectedVehicle}`}
+                </span>
                 <span>HDFC Bank Linked</span>
               </div>
             </div>
@@ -1725,8 +1823,8 @@ function FasttagTab() {
                 <p className="text-slate-500 text-[11px] mt-0.5">Recharge instantly using UPI, NetBanking or Cards.</p>
               </div>
 
-              {message && message.includes("recharged") && (
-                <div className="bg-emerald-50 border border-emerald-250 text-emerald-900 rounded-xl p-2.5 text-xs font-bold my-2 flex items-center gap-2">
+              {message && (
+                <div className="bg-emerald-50 border border-emerald-250 text-emerald-900 rounded-xl p-2.5 text-xs font-bold my-2 flex items-center gap-2 animate-fadeIn">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                   {message}
                 </div>
@@ -1734,14 +1832,29 @@ function FasttagTab() {
 
               <div className="mt-3.5 space-y-3">
                 <div className="flex gap-2">
+                  {selectedVehicle === "All" ? (
+                    <select
+                      value={rechargeTarget}
+                      onChange={e => setRechargeTarget(e.target.value)}
+                      className="bg-slate-50 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-xl px-2 py-2 text-xs font-bold outline-none transition-all cursor-pointer w-[120px]"
+                    >
+                      {vehicles.filter(v => v.status === "Active").map(v => (
+                        <option key={v.num} value={v.num}>{v.num}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 flex items-center justify-center min-w-[100px]">
+                      {selectedVehicle}
+                    </div>
+                  )}
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">₹</span>
                     <input
                       type="number"
                       value={rechargeAmt}
                       onChange={e => setRechargeAmt(e.target.value)}
-                      placeholder="Enter amount"
-                      className="w-full bg-slate-55 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-xl pl-6 pr-3 py-2 text-xs font-extrabold outline-none transition-all"
+                      placeholder="Amount"
+                      className="w-full bg-slate-50 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-xl pl-6 pr-3 py-2 text-xs font-extrabold outline-none transition-all"
                     />
                   </div>
                   <Button
