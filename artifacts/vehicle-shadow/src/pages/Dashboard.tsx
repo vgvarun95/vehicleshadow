@@ -2285,6 +2285,19 @@ export default function Dashboard() {
     api.vehicles.list().then(v => setApiVehicles(v)).catch(() => setApiVehicles(null));
   }, []);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      // Browsers display their own native warning, but setting returnValue is required
+      e.returnValue = "If you refresh, you have to relogin.";
+      return e.returnValue;
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   function handleLogout() { logout(); setLocation("/login"); }
 
   const displayLicences = apiLicences
