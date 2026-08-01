@@ -1880,55 +1880,46 @@ function FasttagTab() {
                 </div>
               )}
 
-              <div className="mt-3.5 space-y-3">
-                <div className="flex gap-2">
-                  {selectedVehicle === "All" ? (
-                    <select
-                      value={rechargeTarget}
-                      onChange={e => setRechargeTarget(e.target.value)}
-                      className="bg-slate-50 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-xl px-2 py-2 text-xs font-bold outline-none transition-all cursor-pointer w-[120px]"
-                    >
-                      {vehicles.filter(v => v.status === "Active").map(v => (
-                        <option key={v.num} value={v.num}>{v.num}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 flex items-center justify-center min-w-[100px]">
-                      {selectedVehicle}
+              {selectedVehicle === "All" ? (
+                <div className="mt-3.5 bg-slate-55 border border-slate-150 rounded-2xl p-4 text-center">
+                  <span className="text-xs font-bold text-slate-500 block">Select a vehicle from Linked Vehicles to recharge its wallet.</span>
+                </div>
+              ) : (
+                <div className="mt-3.5 space-y-3">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">₹</span>
+                      <input
+                        type="number"
+                        value={rechargeAmt}
+                        onChange={e => setRechargeAmt(e.target.value)}
+                        placeholder="Amount"
+                        className="w-full bg-slate-50 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-xl pl-6 pr-3 py-2 text-xs font-extrabold outline-none transition-all"
+                      />
                     </div>
-                  )}
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">₹</span>
-                    <input
-                      type="number"
-                      value={rechargeAmt}
-                      onChange={e => setRechargeAmt(e.target.value)}
-                      placeholder="Amount"
-                      className="w-full bg-slate-50 border border-slate-250 focus:border-primary/60 focus:bg-white rounded-xl pl-6 pr-3 py-2 text-xs font-extrabold outline-none transition-all"
-                    />
-                  </div>
-                  <Button
-                    onClick={() => handleRecharge()}
-                    disabled={isLoading || !rechargeAmt}
-                    className="bg-primary hover:bg-primary/90 rounded-xl text-xs font-extrabold py-2 px-4 cursor-pointer text-white h-full"
-                  >
-                    {isLoading ? "..." : "Recharge"}
-                  </Button>
-                </div>
-
-                <div className="flex gap-1.5">
-                  {[100, 200, 500].map(amt => (
-                    <button
-                      key={amt}
-                      onClick={() => handleRecharge(amt)}
-                      disabled={isLoading}
-                      className="bg-slate-100 hover:bg-slate-200 border border-slate-200 disabled:opacity-50 text-slate-800 text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-all cursor-pointer flex-1"
+                    <Button
+                      onClick={() => handleRecharge()}
+                      disabled={isLoading || !rechargeAmt}
+                      className="bg-primary hover:bg-primary/90 rounded-xl text-xs font-extrabold py-2 px-4 cursor-pointer text-white h-full"
                     >
-                      +₹{amt}
-                    </button>
-                  ))}
+                      {isLoading ? "..." : "Recharge"}
+                    </Button>
+                  </div>
+
+                  <div className="flex gap-1.5">
+                    {[100, 200, 500].map(amt => (
+                      <button
+                        key={amt}
+                        onClick={() => handleRecharge(amt)}
+                        disabled={isLoading}
+                        className="bg-slate-100 hover:bg-slate-200 border border-slate-200 disabled:opacity-50 text-slate-800 text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-all cursor-pointer flex-1"
+                      >
+                        +₹{amt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
           </div>
