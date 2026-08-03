@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -32,38 +32,56 @@ const tabs: { id: Tab; label: string; icon: any }[] = [
 
 /* ---- Spare Parts Mall ---- */
 
-const CAR_DATA: Record<string, Record<string, string[]>> = {
-  "Maruti Suzuki": {
-    "Swift":    ["LXi","VXi","ZXi","ZXi+","AMT"],
-    "Alto K10": ["STD","LXi","VXi","VXi+"],
-    "Baleno":   ["Sigma","Delta","Zeta","Alpha","Alpha+"],
-    "Ertiga":   ["LXi","VXi","ZXi","ZXi+"],
-    "WagonR":   ["LXi","VXi","ZXi","ZXi AMT"],
+const MALL_VEHICLES_DATA: Record<string, Record<string, Record<string, string[]>>> = {
+  "Car": {
+    "Maruti Suzuki": {
+      "Swift":    ["LXi","VXi","ZXi","ZXi+","AMT"],
+      "Alto K10": ["STD","LXi","VXi","VXi+"],
+      "Baleno":   ["Sigma","Delta","Zeta","Alpha","Alpha+"],
+      "Ertiga":   ["LXi","VXi","ZXi","ZXi+"],
+      "WagonR":   ["LXi","VXi","ZXi","ZXi AMT"],
+    },
+    "Hyundai": {
+      "i20":     ["Era","Magna","Sportz","Asta","Asta(O)"],
+      "Creta":   ["E","EX","S","SX","SX(O)"],
+      "Venue":   ["E","S","S+","SX","SX(O)"],
+      "Verna":   ["EX","S","SX","SX(O)"],
+    },
+    "Tata": {
+      "Nexon":    ["XE","XM","XMA","XT","XZ","XZ+"],
+      "Altroz":   ["XE","XM","XT","XZ","XZ+"],
+      "Punch":    ["Pure","Adventure","Accomplished","Creative"],
+      "Tiago":    ["XE","XM","XT","XZ","XZ+"],
+    },
+    "Honda": {
+      "City":      ["SV","V","VX","ZX"],
+      "Amaze":     ["E","S","V","VX"],
+    }
   },
-  "Honda": {
-    "Activa 6G": ["STD","DLX","OBD2"],
-    "City":      ["SV","V","VX","ZX"],
-    "Amaze":     ["E","S","V","VX"],
-    "Shine":     ["CB Shine","CB Shine SP"],
+  "Bike": {
+    "Bajaj": {
+      "Pulsar 150": ["STD","ABS"],
+      "Pulsar NS200":["STD","ABS"],
+      "Platina":    ["100","110 H-Gear"],
+      "Dominar 400":["STD","ABS"],
+    },
+    "Honda": {
+      "Shine":     ["CB Shine","CB Shine SP"],
+    }
   },
-  "Hyundai": {
-    "i20":     ["Era","Magna","Sportz","Asta","Asta(O)"],
-    "Creta":   ["E","EX","S","SX","SX(O)"],
-    "Venue":   ["E","S","S+","SX","SX(O)"],
-    "Verna":   ["EX","S","SX","SX(O)"],
+  "Scooty": {
+    "Honda": {
+      "Activa 6G": ["STD","DLX","OBD2"],
+    }
   },
-  "Tata": {
-    "Nexon":    ["XE","XM","XMA","XT","XZ","XZ+"],
-    "Altroz":   ["XE","XM","XT","XZ","XZ+"],
-    "Punch":    ["Pure","Adventure","Accomplished","Creative"],
-    "Tiago":    ["XE","XM","XT","XZ","XZ+"],
-  },
-  "Bajaj": {
-    "Pulsar 150": ["STD","ABS"],
-    "Pulsar NS200":["STD","ABS"],
-    "Platina":    ["100","110 H-Gear"],
-    "Dominar 400":["STD","ABS"],
-  },
+  "Truck": {
+    "Tata": {
+      "Prima":     ["4030.S","4930.S"],
+    },
+    "Ashok Leyland": {
+      "Dost+":     ["LS","LX"],
+    }
+  }
 };
 
 const CATEGORY_DATA: Record<string, string[]> = {
@@ -130,6 +148,7 @@ const POPULAR_BRANDS = [
 ];
 
 function MallTab() {
+  const [vehicleType, setVehicleType] = useState("");
   const [carBrand,  setCarBrand]  = useState("");
   const [model,     setModel]     = useState("");
   const [variant,   setVariant]   = useState("");
@@ -193,11 +212,47 @@ function MallTab() {
     setTextQuery(partNumberSearch.trim());
   }
 
-  const models   = carBrand ? Object.keys(CAR_DATA[carBrand] || {}) : [];
-  const variants = model && carBrand ? (CAR_DATA[carBrand]?.[model] || []) : [];
+  const brands = useMemo(() => {
+    if (vehicleType) {
+      return Object.keys(MALL_VEHICLES_DATA[vehicleType] || {});
+    }
+    const list: string[] = [];
+    Object.keys(MALL_VEHICLES_DATA).forEach(type => {
+      list.push(...Object.keys(MALL_VEHICLES_DATA[type]));
+    });
+    return Array.from(new Set(list));
+  }, [vehicleType]);
+
+  const models = useMemo(() => {
+    if (!carBrand) return [];
+    if (vehicleType) {
+      return Object.keys(MALL_VEHICLES_DATA[vehicleType]?.[carBrand] || {});
+    }
+    const list: string[] = [];
+    Object.keys(MALL_VEHICLES_DATA).forEach(type => {
+      const typeBrands = MALL_VEHICLES_DATA[type];
+      if (typeBrands[carBrand]) {
+        list.push(...Object.keys(typeBrands[carBrand]));
+      }
+    });
+    return Array.from(new Set(list));
+  }, [vehicleType, carBrand]);
+
+  const variants = useMemo(() => {
+    if (!carBrand || !model) return [];
+    if (vehicleType) {
+      return MALL_VEHICLES_DATA[vehicleType]?.[carBrand]?.[model] || [];
+    }
+    for (const type of Object.keys(MALL_VEHICLES_DATA)) {
+      const v = MALL_VEHICLES_DATA[type]?.[carBrand]?.[model];
+      if (v) return v;
+    }
+    return [];
+  }, [vehicleType, carBrand, model]);
+
   const subCats  = broadCat ? (CATEGORY_DATA[broadCat] || []) : [];
 
-  function clearCarFilter()  { setCarBrand(""); setModel(""); setVariant(""); setVinVerified(null); setVinNumber(""); }
+  function clearCarFilter()  { setVehicleType(""); setCarBrand(""); setModel(""); setVariant(""); setVinVerified(null); setVinNumber(""); }
   function clearCatFilter()  { setBroadCat(""); setSubCat(""); setSelectedSchematicPart(null); }
   function clearAllFilters() {
     clearCarFilter();
@@ -208,9 +263,13 @@ function MallTab() {
     setSelectedBrandFilter("");
   }
 
-  const activeFilters = !!(carBrand || model || variant || broadCat || subCat || textQuery || selectedBrandFilter || qualityFilter !== "all" || selectedSchematicPart !== null);
+  const activeFilters = !!(vehicleType || carBrand || model || variant || broadCat || subCat || textQuery || selectedBrandFilter || qualityFilter !== "all" || selectedSchematicPart !== null);
 
   const displayParts = apiParts ?? ALL_PARTS.filter(p => {
+    if (vehicleType) {
+      const match = MALL_VEHICLES_DATA[vehicleType]?.[p.carBrand]?.[p.model];
+      if (!match) return false;
+    }
     const carOk = (!carBrand || p.carBrand===carBrand) && (!model || p.model===model) && (!variant || p.variant===variant);
     if (!carOk) return false;
 
@@ -306,7 +365,9 @@ function MallTab() {
           {searchType === "car" && (
             <div className="space-y-3">
               <div className="flex gap-3 flex-wrap">
-                <DropdownSelect label="Brand"   value={carBrand} options={Object.keys(CAR_DATA)}
+                <DropdownSelect label="Vehicle Type" value={vehicleType} options={["Bike", "Scooty", "Car", "Truck"]}
+                  onChange={v=>{ setVehicleType(v); setCarBrand(""); setModel(""); setVariant(""); }}/>
+                <DropdownSelect label="Brand"   value={carBrand} options={brands} disabled={!vehicleType}
                   onChange={v=>{ setCarBrand(v); setModel(""); setVariant(""); }}/>
                 <DropdownSelect label="Model"   value={model}    options={models}   disabled={!carBrand}
                   onChange={v=>{ setModel(v); setVariant(""); }}/>
@@ -461,7 +522,8 @@ function MallTab() {
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Active:</span>
           {[
-            carBrand ? `Car: ${carBrand}` : "",
+            vehicleType ? `Type: ${vehicleType}` : "",
+            carBrand ? `Brand: ${carBrand}` : "",
             model ? `Model: ${model}` : "",
             variant ? `Variant: ${variant}` : "",
             broadCat ? `Cat: ${broadCat}` : "",
